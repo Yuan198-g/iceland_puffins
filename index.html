@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>极夜海雀 · Aurora Puffins</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --aurora: #6EE7B7;
+    --aurora-deep: #34D399;
+    --ink: #EAF2F6;
+    --ink-soft: #A9C0CC;
+    --panel-bg: rgba(10, 18, 34, 0.55);
+    --panel-border: rgba(234, 242, 246, 0.14);
+  }
+  *{ box-sizing: border-box; }
+  html, body{
+    margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+    font-family: 'Noto Sans SC', -apple-system, sans-serif;
+    background:#0B1230;
+  }
+  #canvas-wrap{ position:fixed; inset:0; }
+  canvas{ display:block; touch-action:none; }
+
+  #loading{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:14px;
+    background: linear-gradient(180deg,#0B1230 0%, #142042 55%, #0E1730 100%);
+    z-index: 50; transition: opacity .6s ease;
+  }
+  #loading .mark{
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:21px; color:var(--ink);
+    letter-spacing:.02em;
+  }
+  #loading .bar{ width:180px; height:3px; background:rgba(234,242,246,.14); border-radius:2px; overflow:hidden; }
+  #loading .bar-fill{ height:100%; width:0%; background:var(--aurora); transition:width .25s ease; }
+  #loading.hide{ opacity:0; pointer-events:none; }
+
+  .hud{ position:fixed; z-index:10; font-family:'Noto Sans SC', sans-serif; color:var(--ink); }
+
+  #title-block{ top:28px; left:32px; }
+  #title-block .eyebrow{
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:19px;
+    color:var(--ink); letter-spacing:.01em;
+  }
+  #title-block .sub{
+    margin-top:4px; font-size:12.5px; color:var(--ink-soft); max-width:290px; line-height:1.5;
+  }
+
+  #hint{
+    bottom:26px; left:32px; font-size:12px; color:var(--ink-soft);
+    display:flex; gap:16px; flex-wrap:wrap; max-width:60vw;
+  }
+  #hint span{ white-space:nowrap; }
+  #hint b{ color:var(--ink); font-weight:600; }
+
+  #panel{
+    bottom:24px; right:28px;
+    background:var(--panel-bg); backdrop-filter: blur(12px);
+    border:1px solid var(--panel-border);
+    border-radius:16px; padding:14px 18px;
+    display:flex; align-items:center; gap:18px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  }
+  .ctrl{ display:flex; align-items:center; gap:10px; }
+  .ctrl-label{ font-size:11px; color:var(--ink-soft); letter-spacing:.04em; white-space:nowrap; }
+  #windRange{
+    -webkit-appearance:none; width:110px; height:4px; border-radius:2px;
+    background: linear-gradient(90deg, var(--aurora) 0%, var(--aurora) var(--fill,20%), rgba(234,242,246,.18) var(--fill,20%));
+    outline:none;
+  }
+  #windRange::-webkit-slider-thumb{
+    -webkit-appearance:none; width:15px; height:15px; border-radius:50%;
+    background:#fff; border:2.5px solid var(--aurora-deep); cursor:pointer;
+    box-shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+  #windRange::-moz-range-thumb{
+    width:15px; height:15px; border-radius:50%;
+    background:#fff; border:2.5px solid var(--aurora-deep); cursor:pointer;
+  }
+  #windText{ font-size:12.5px; font-weight:500; color:var(--ink); width:34px; }
+
+  #dayToggle{
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    background:rgba(234,242,246,.08); border-radius:999px; padding:7px 13px 7px 10px;
+    border:1px solid transparent; transition: background .2s ease;
+    user-select:none;
+  }
+  #dayToggle:hover{ background:rgba(234,242,246,.14); }
+  #dayToggle .dot{
+    width:9px; height:9px; border-radius:50%; background:#FDE68A;
+    box-shadow:0 0 6px rgba(253,230,138,.8);
+    transition: background .4s ease, box-shadow .4s ease;
+  }
+  #dayToggle.night .dot{ background:var(--aurora); box-shadow:0 0 6px rgba(110,231,183,.9); }
+  #dayToggle span.txt{ font-size:12.5px; color:var(--ink); }
+
+  #toast{
+    position:fixed; z-index:10; left:50%; top:34px; transform:translateX(-50%) translateY(-12px);
+    background:var(--panel-bg); backdrop-filter:blur(8px); border:1px solid var(--panel-border);
+    padding:8px 16px; border-radius:999px; font-size:12.5px; color:var(--ink);
+    opacity:0; transition: opacity .35s ease, transform .35s ease; pointer-events:none;
+    box-shadow:0 6px 18px rgba(0,0,0,.3);
+  }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width: 640px){
+    #title-block .sub{ display:none; }
+    #hint{ max-width:90vw; font-size:10.5px; gap:10px; }
+    #panel{ padding:10px 12px; gap:12px; }
+    #windRange{ width:70px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="mark">极夜海雀</div>
+  <div class="bar"><div class="bar-fill" id="loadBar"></div></div>
+</div>
+
+<div id="canvas-wrap"></div>
+
+<div class="hud" id="title-block">
+  <div class="eyebrow">极夜海雀</div>
+  <div class="sub">风从冰原上刮过,海雀们缩着脖子站在雪地里。</div>
+</div>
+
+<div class="hud" id="hint">
+  <span><b>点地面</b> 喂食</span>
+  <span><b>点海雀</b> 翻个跟头</span>
+  <span><b>点湖里的鱼</b> 吓它跳上岸</span>
+  <span><b>拖动</b> 旋转视角</span>
+  <span><b>右键/双指</b> 平移</span>
+  <span><b>滚轮</b> 缩放</span>
+</div>
+
+<div class="hud" id="panel">
+  <div class="ctrl">
+    <span class="ctrl-label">风力</span>
+    <input type="range" id="windRange" min="0" max="100" value="24">
+    <span id="windText">微风</span>
+  </div>
+  <div id="dayToggle">
+    <span class="dot"></span>
+    <span class="txt" id="dayToggleText">白昼</span>
+  </div>
+</div>
+
+<div class="hud" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // ===============================================================
+  // 0. Basic setup
+  // ===============================================================
+  var wrap = document.getElementById("canvas-wrap");
+  var scene = new THREE.Scene();
+
+  var camera = new THREE.PerspectiveCamera(
+    46, window.innerWidth / window.innerHeight, 0.1, 600
+  );
+  camera.position.set(11, 6.5, 14);
+
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  wrap.appendChild(renderer.domElement);
+
+  var controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 4;
+  controls.maxDistance = 46;
+  controls.maxPolarAngle = Math.PI * 0.495;
+  controls.target.set(0, 0.6, 0);
+  controls.update();
+
+  window.addEventListener("resize", function () {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  var WORLD_RADIUS = 30;
+
+  function groundHeight(x, z) {
+    return (
+      Math.sin(x * 0.1) * Math.cos(z * 0.09) * 0.22 +
+      Math.sin(x * 0.28 + z * 0.19) * 0.09
+    );
+  }
+
+  // ===============================================================
+  // 1. Sky dome (polar day <-> polar night gradient)
+  // ===============================================================
+  var skyPalette = {
+    day: { top: new THREE.Color("#8FB9DE"), bottom: new THREE.Color("#DCEBF2") },
+    night: { top: new THREE.Color("#050914"), bottom: new THREE.Color("#111A38") }
+  };
+  var skyUniforms = {
+    topColor: { value: skyPalette.day.top.clone() },
+    bottomColor: { value: skyPalette.day.bottom.clone() },
+    offset: { value: 6 },
+    exponent: { value: 0.68 }
+  };
+  var sky = new THREE.Mesh(
+    new THREE.SphereGeometry(160, 24, 16),
+    new THREE.ShaderMaterial({
+      uniforms: skyUniforms,
+      side: THREE.BackSide,
+      depthWrite: false,
+      vertexShader: [
+        "varying vec3 vWorldPos;",
+        "void main(){",
+        "  vec4 wp = modelMatrix * vec4(position, 1.0);",
+        "  vWorldPos = wp.xyz;",
+        "  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
+        "}"
+      ].join("\n"),
+      fragmentShader: [
+        "uniform vec3 topColor;", "uniform vec3 bottomColor;",
+        "uniform float offset;", "uniform float exponent;",
+        "varying vec3 vWorldPos;",
+        "void main(){",
+        "  float h = normalize(vWorldPos + vec3(0.0, offset, 0.0)).y;",
+        "  float t = clamp(pow(max(h, 0.0), exponent), 0.0, 1.0);",
+        "  gl_FragColor = vec4(mix(bottomColor, topColor, t), 1.0);",
+        "}"
+      ].join("\n")
+    })
+  );
+  scene.add(sky);
+  scene.fog = new THREE.Fog(skyPalette.day.bottom.getHex(), 30, 78);
+
+  // ===============================================================
+  // 2. Aurora ribbon (visible mainly at night)
+  // ===============================================================
+  var auroraUniforms = {
+    uTime: { value: 0 },
+    uNight: { value: 0 },
+    uColorA: { value: new THREE.Color("#34D399") },
+    uColorB: { value: new THREE.Color("#22D3EE") },
+    uColorC: { value: new THREE.Color("#A78BFA") }
+  };
+  var auroraGeo = new THREE.CylinderGeometry(46, 46, 20, 48, 20, true, Math.PI * 0.15, Math.PI * 0.7);
+  var auroraMat = new THREE.ShaderMaterial({
+    uniforms: auroraUniforms,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+    vertexShader: [
+      "varying vec2 vUv;",
+      "void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }"
+    ].join("\n"),
+    fragmentShader: [
+      "uniform float uTime; uniform float uNight;",
+      "uniform vec3 uColorA; uniform vec3 uColorB; uniform vec3 uColorC;",
+      "varying vec2 vUv;",
+      "void main(){",
+      "  float n1 = sin(vUv.x*7.0 + uTime*0.55) * 0.5 + 0.5;",
+      "  float n2 = sin(vUv.x*13.0 - uTime*0.8 + vUv.y*5.0) * 0.5 + 0.5;",
+      "  float band = smoothstep(0.15, 0.95, n1*0.6 + n2*0.4);",
+      "  vec3 col = mix(uColorA, uColorB, sin(vUv.x*4.0 + uTime*0.3)*0.5+0.5);",
+      "  col = mix(col, uColorC, n2*0.35);",
+      "  float edge = sin(vUv.y * 3.14159265);",
+      "  float alpha = band * edge * uNight * 0.85;",
+      "  gl_FragColor = vec4(col, alpha);",
+      "}"
+    ].join("\n")
+  });
+  var aurora = new THREE.Mesh(auroraGeo, auroraMat);
+  aurora.position.y = 20;
+  scene.add(aurora);
+
+  // ===============================================================
+  // 3. Stars (fade in at night)
+  // ===============================================================
+  var starCount = 500;
+  var starPos = new Float32Array(starCount * 3);
+  for (var s = 0; s < starCount; s++) {
+    var theta = Math.random() * Math.PI * 2;
+    var phi = Math.random() * Math.PI * 0.42 + 0.06;
+    var r = 140;
+    starPos[s * 3] = r * Math.sin(phi) * Math.cos(theta);
+    starPos[s * 3 + 1] = r * Math.cos(phi) + 10;
+    starPos[s * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+  }
+  var starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
+  var starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.1, transparent: true, opacity: 0 });
+  var stars = new THREE.Points(starGeo, starMat);
+  scene.add(stars);
+
+  // ===============================================================
+  // 4. Lights, day/night interpolation
+  // ===============================================================
+  var hemi = new THREE.HemisphereLight(0xbcd6ee, 0xdfe9f2, 1.0);
+  scene.add(hemi);
+
+  var sun = new THREE.DirectionalLight(0xfff2df, 1.1);
+  sun.position.set(16, 18, 6);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.camera.left = -22; sun.shadow.camera.right = 22;
+  sun.shadow.camera.top = 22; sun.shadow.camera.bottom = -22;
+  sun.shadow.camera.far = 60; sun.shadow.bias = -0.0025;
+  scene.add(sun); scene.add(sun.target);
+
+  var lightPalette = {
+    day: {
+      hemiSky: new THREE.Color("#BCD6EE"), hemiGround: new THREE.Color("#DFE9F2"), hemiI: 1.0,
+      sunColor: new THREE.Color("#FFF2DF"), sunI: 1.1, sunPos: new THREE.Vector3(16, 18, 6)
+    },
+    night: {
+      hemiSky: new THREE.Color("#141C3A"), hemiGround: new THREE.Color("#1E2438"), hemiI: 0.28,
+      sunColor: new THREE.Color("#7C9CD8"), sunI: 0.18, sunPos: new THREE.Vector3(-12, 14, -8)
+    }
+  };
+  var dayNight = { target: 0, current: 0 };
+
+  function updateDayNight(dt) {
+    var speed = 0.85;
+    if (dayNight.current < dayNight.target) dayNight.current = Math.min(dayNight.target, dayNight.current + dt * speed);
+    else if (dayNight.current > dayNight.target) dayNight.current = Math.max(dayNight.target, dayNight.current - dt * speed);
+    var t = dayNight.current, d = lightPalette.day, n = lightPalette.night;
+
+    hemi.color.copy(d.hemiSky).lerp(n.hemiSky, t);
+    hemi.groundColor.copy(d.hemiGround).lerp(n.hemiGround, t);
+    hemi.intensity = THREE.MathUtils.lerp(d.hemiI, n.hemiI, t);
+    sun.color.copy(d.sunColor).lerp(n.sunColor, t);
+    sun.intensity = THREE.MathUtils.lerp(d.sunI, n.sunI, t);
+    sun.position.lerpVectors(d.sunPos, n.sunPos, t);
+    sun.target.position.set(0, 0, 0);
+
+    skyUniforms.topColor.value.copy(skyPalette.day.top).lerp(skyPalette.night.top, t);
+    skyUniforms.bottomColor.value.copy(skyPalette.day.bottom).lerp(skyPalette.night.bottom, t);
+    scene.fog.color.copy(skyPalette.day.bottom.clone().lerp(skyPalette.night.bottom, t));
+
+    auroraUniforms.uNight.value = t;
+    starMat.opacity = t * 0.9;
+  }
+
+  // ===============================================================
+  // 5. Snow ground
+  // ===============================================================
+  var groundGeo = new THREE.PlaneGeometry(WORLD_RADIUS * 2.6, WORLD_RADIUS * 2.6, 110, 110);
+  groundGeo.rotateX(-Math.PI / 2);
+  var posAttr = groundGeo.attributes.position;
+  var colors = [];
+  var snowHi = new THREE.Color("#FBFDFF");
+  var snowLo = new THREE.Color("#CFE1EE");
+  var snowShade = new THREE.Color("#AEC7DC");
+  for (var i = 0; i < posAttr.count; i++) {
+    var x = posAttr.getX(i), z = posAttr.getZ(i);
+    var h = groundHeight(x, z);
+    posAttr.setY(i, h);
+    var mix = (Math.sin(x * 0.4) * Math.cos(z * 0.4) + 1) * 0.5;
+    var c = snowHi.clone().lerp(snowLo, mix * 0.5);
+    c.lerp(snowShade, THREE.MathUtils.clamp((0.15 - h) * 0.9, 0, 0.4));
+    colors.push(c.r, c.g, c.b);
+  }
+  groundGeo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+  groundGeo.computeVertexNormals();
+  var ground = new THREE.Mesh(
+    groundGeo,
+    new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.95, metalness: 0 })
+  );
+  ground.receiveShadow = true;
+  ground.name = "ground";
+  scene.add(ground);
+
+  // Unfrozen ponds (geothermal pools stay liquid even in the polar night) —
+  // dark, semi-transparent so fish read clearly under the surface.
+  var ponds = [];
+  function addPond(x, z, r) {
+    var baseY = groundHeight(x, z) + 0.01;
+    var waterGeo = new THREE.CircleGeometry(r, 28);
+    waterGeo.rotateX(-Math.PI / 2);
+    var water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({
+      color: "#123244", transparent: true, opacity: 0.82, roughness: 0.25, metalness: 0.15
+    }));
+    water.position.set(x, baseY, z);
+    scene.add(water);
+
+    var rim = new THREE.Mesh(
+      new THREE.TorusGeometry(r, 0.1, 6, 28),
+      new THREE.MeshStandardMaterial({ color: "#EAF3FA", flatShading: true, roughness: 0.9 })
+    );
+    rim.rotation.x = Math.PI / 2;
+    rim.position.set(x, baseY + 0.03, z);
+    scene.add(rim);
+
+    ponds.push({ x: x, z: z, r: r, waterY: baseY, water: water, pendingRespawnAt: null });
+  }
+  addPond(-10, 6, 4.6);
+  addPond(9, -9, 3.6);
+
+  function pointInAnyPond(x, z) {
+    for (var i = 0; i < ponds.length; i++) {
+      var p = ponds[i];
+      var dx = x - p.x, dz = z - p.z;
+      if (dx * dx + dz * dz < p.r * p.r) return true;
+    }
+    return false;
+  }
+
+  // scattered rocks
+  for (var r = 0; r < 16; r++) {
+    var ang = Math.random() * Math.PI * 2, rad = 6 + Math.random() * 20;
+    var rx = Math.cos(ang) * rad, rz = Math.sin(ang) * rad;
+    var rock = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.15 + Math.random() * 0.25, 0),
+      new THREE.MeshStandardMaterial({ color: "#6B7480", flatShading: true, roughness: 1 })
+    );
+    rock.position.set(rx, groundHeight(rx, rz) + 0.08, rz);
+    rock.rotation.set(Math.random(), Math.random(), Math.random());
+    rock.castShadow = true;
+    scene.add(rock);
+  }
+
+  // ===============================================================
+  // 6. Snow-capped mountain range (static ring)
+  // ===============================================================
+  function makeMountain(x, z, h, baseR) {
+    var g = new THREE.Group();
+    var rock = new THREE.Mesh(
+      new THREE.ConeGeometry(baseR, h, 5),
+      new THREE.MeshStandardMaterial({ color: "#6E7885", flatShading: true, roughness: 1 })
+    );
+    rock.position.y = h / 2;
+    g.add(rock);
+    var cap = new THREE.Mesh(
+      new THREE.ConeGeometry(baseR * 0.55, h * 0.42, 5),
+      new THREE.MeshStandardMaterial({ color: "#F5FAFE", flatShading: true, roughness: 0.85 })
+    );
+    cap.position.y = h - (h * 0.42) / 2 + 0.05;
+    g.add(cap);
+    g.position.set(x, groundHeight(x, z), z);
+    g.rotation.y = Math.random() * Math.PI;
+    return g;
+  }
+  for (var m = 0; m < 18; m++) {
+    var mAng = (m / 18) * Math.PI * 2 + Math.random() * 0.2;
+    var mRad = 34 + Math.random() * 16;
+    var mh = 6 + Math.random() * 9;
+    scene.add(makeMountain(Math.cos(mAng) * mRad, Math.sin(mAng) * mRad, mh, 3 + Math.random() * 3));
+  }
+
+  // ===============================================================
+  // 7. Falling / wind-blown snow particles
+  // ===============================================================
+  var SNOW_COUNT = 700;
+  var snowGeo = new THREE.BufferGeometry();
+  var snowPos = new Float32Array(SNOW_COUNT * 3);
+  var snowVel = new Float32Array(SNOW_COUNT);
+  for (var sp = 0; sp < SNOW_COUNT; sp++) {
+    snowPos[sp * 3] = (Math.random() - 0.5) * WORLD_RADIUS * 2.2;
+    snowPos[sp * 3 + 1] = Math.random() * 14;
+    snowPos[sp * 3 + 2] = (Math.random() - 0.5) * WORLD_RADIUS * 2.2;
+    snowVel[sp] = 0.5 + Math.random() * 0.7;
+  }
+  snowGeo.setAttribute("position", new THREE.BufferAttribute(snowPos, 3));
+  var snowMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.09, transparent: true, opacity: 0.85 });
+  var snowPoints = new THREE.Points(snowGeo, snowMat);
+  scene.add(snowPoints);
+
+  function updateSnow(dt, windStrength) {
+    var arr = snowGeo.attributes.position.array;
+    for (var i = 0; i < SNOW_COUNT; i++) {
+      var iy = i * 3 + 1, ix = i * 3;
+      arr[iy] -= snowVel[i] * dt;
+      arr[ix] += windStrength * dt * 2.2;
+      if (arr[iy] < -0.5) {
+        arr[iy] = 12 + Math.random() * 3;
+        arr[ix] = (Math.random() - 0.5) * WORLD_RADIUS * 2.2;
+        arr[i * 3 + 2] = (Math.random() - 0.5) * WORLD_RADIUS * 2.2;
+      }
+      if (arr[ix] > WORLD_RADIUS * 1.3) arr[ix] = -WORLD_RADIUS * 1.3;
+    }
+    snowGeo.attributes.position.needsUpdate = true;
+  }
+
+  // ===============================================================
+  // 8. Puffins — procedural low-poly builder + AI state machine
+  // ===============================================================
+  var puffins = [];
+  var clickTargets = [];
+
+  function mat(color, extra) {
+    var o = { color: color, flatShading: true, roughness: 0.85 };
+    if (extra) for (var k in extra) o[k] = extra[k];
+    return new THREE.MeshStandardMaterial(o);
+  }
+
+  function buildPuffin() {
+    var root = new THREE.Group();
+    var bob = new THREE.Group();
+    root.add(bob);
+
+    var black = mat("#1C1D22");
+    var white = mat("#F6F4EC");
+    var orange = mat("#E8703A");
+    var greyBeak = mat("#5B6472");
+
+    var bodyMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.19, 1), black);
+    bodyMesh.scale.set(1, 1.15, 1.3);
+    bodyMesh.position.y = 0.22;
+    bodyMesh.castShadow = true;
+    bob.add(bodyMesh);
+
+    var belly = new THREE.Mesh(new THREE.IcosahedronGeometry(0.13, 1), white);
+    belly.scale.set(0.95, 0.9, 1.1);
+    belly.position.set(0, 0.13, 0.05);
+    bob.add(belly);
+
+    var head = new THREE.Mesh(new THREE.IcosahedronGeometry(0.13, 1), black);
+    head.position.set(0, 0.4, 0.16);
+    head.castShadow = true;
+    bob.add(head);
+
+    var face = new THREE.Mesh(new THREE.IcosahedronGeometry(0.085, 0), white);
+    face.scale.set(1, 0.9, 0.6);
+    face.position.set(0, 0.4, 0.24);
+    bob.add(face);
+
+    var beakTop = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.16, 4), orange);
+    beakTop.rotation.x = Math.PI / 2;
+    beakTop.position.set(0, 0.41, 0.34);
+    bob.add(beakTop);
+    var beakBase = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.06, 4), greyBeak);
+    beakBase.rotation.x = Math.PI / 2;
+    beakBase.position.set(0, 0.41, 0.26);
+    bob.add(beakBase);
+
+    var leftFoot = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.02, 0.13), orange);
+    leftFoot.position.set(-0.08, 0.02, 0.06);
+    bob.add(leftFoot);
+    var rightFoot = leftFoot.clone();
+    rightFoot.position.x = 0.08;
+    bob.add(rightFoot);
+
+    var tail = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.13, 4), black);
+    tail.rotation.x = -Math.PI / 2.4;
+    tail.position.set(0, 0.22, -0.24);
+    bob.add(tail);
+
+    var wingGeo = new THREE.BoxGeometry(0.03, 0.2, 0.14);
+    var leftWingPivot = new THREE.Group();
+    leftWingPivot.position.set(-0.14, 0.26, 0.0);
+    var leftWing = new THREE.Mesh(wingGeo, black);
+    leftWing.position.set(-0.08, -0.02, 0);
+    leftWingPivot.add(leftWing);
+    bob.add(leftWingPivot);
+
+    var rightWingPivot = new THREE.Group();
+    rightWingPivot.position.set(0.14, 0.26, 0.0);
+    var rightWing = new THREE.Mesh(wingGeo, black);
+    rightWing.position.set(0.08, -0.02, 0);
+    rightWingPivot.add(rightWing);
+    bob.add(rightWingPivot);
+
+    return { root: root, bob: bob, leftWingPivot: leftWingPivot, rightWingPivot: rightWingPivot };
+  }
+
+  var FLY_DISTANCE_THRESHOLD = 6.0;
+  var WANDER_RADIUS = 3.2;
+  var FLY_SPEED = 6.5;
+  var WALK_SPEED = 0.85;
+
+  function spawnPuffin(x, z) {
+    var built = buildPuffin();
+    var root = built.root;
+    root.position.set(x, groundHeight(x, z), z);
+    root.rotation.y = Math.random() * Math.PI * 2;
+    scene.add(root);
+
+    var hitbox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.55, 0.7, 0.55),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    hitbox.position.y = 0.32;
+    hitbox.userData.type = "puffin";
+    hitbox.userData.puffinIndex = puffins.length;
+    root.add(hitbox);
+    clickTargets.push(hitbox);
+
+    puffins.push({
+      root: root, bob: built.bob,
+      leftWingPivot: built.leftWingPivot, rightWingPivot: built.rightWingPivot,
+      home: new THREE.Vector2(x, z),
+      target: new THREE.Vector2(x, z),
+      flightStart: new THREE.Vector2(x, z),
+      flightDuration: 1, flightT: 0,
+      state: "idle",
+      idleT: 0.6 + Math.random() * 2.2,
+      bobPhase: Math.random() * Math.PI * 2,
+      spinT: 0, spinDur: 0.85,
+      foodRef: null
+    });
+  }
+
+  var puffinAng, puffinRad, px, pz;
+  for (var pi = 0; pi < 13; pi++) {
+    puffinAng = Math.random() * Math.PI * 2;
+    puffinRad = 2 + Math.random() * 9;
+    px = Math.cos(puffinAng) * puffinRad;
+    pz = Math.sin(puffinAng) * puffinRad * 0.8 - 1;
+    spawnPuffin(px, pz);
+  }
+
+  function pickWanderTarget(p) {
+    var angle = Math.random() * Math.PI * 2;
+    var dist = 0.8 + Math.random() * WANDER_RADIUS;
+    var nx = THREE.MathUtils.clamp(p.home.x + Math.cos(angle) * dist, -WORLD_RADIUS + 3, WORLD_RADIUS - 3);
+    var nz = THREE.MathUtils.clamp(p.home.y + Math.sin(angle) * dist, -WORLD_RADIUS + 3, WORLD_RADIUS - 3);
+    p.target.set(nx, nz);
+  }
+
+  function faceToward(root, dx, dz, dt, turnSpeed) {
+    var targetAngle = Math.atan2(dx, dz);
+    var da = targetAngle - root.rotation.y;
+    da = Math.atan2(Math.sin(da), Math.cos(da));
+    root.rotation.y += da * Math.min(1, dt * turnSpeed);
+  }
+
+  function sendToFood(p, food) {
+    var pos2 = new THREE.Vector2(p.root.position.x, p.root.position.z);
+    var dist = pos2.distanceTo(food.pos);
+    p.foodRef = food;
+    p.target.copy(food.pos);
+    if (dist < FLY_DISTANCE_THRESHOLD) {
+      p.state = "walk";
+    } else {
+      p.flightStart.copy(pos2);
+      p.flightT = 0;
+      p.flightDuration = Math.max(0.9, dist / FLY_SPEED);
+      p.state = "fly";
+    }
+  }
+
+  function updatePuffins(dt, windFactor, elapsed) {
+    for (var i = 0; i < puffins.length; i++) {
+      var p = puffins[i];
+      var wingFlap = 0;
+
+      if (p.state === "spin") {
+        p.spinT += dt;
+        var sp = Math.min(p.spinT / p.spinDur, 1);
+        var arc = Math.sin(sp * Math.PI) * 1.1;
+        var bulge = Math.sin(sp * Math.PI); // 0 -> 1 -> 0
+        p.root.position.y = groundHeight(p.root.position.x, p.root.position.z) + arc;
+        p.root.rotation.y += dt * (Math.PI * 2.6);
+        p.root.rotation.x = Math.sin(sp * Math.PI * 2) * 0.5;
+        var scale = 1 + bulge * 0.35;
+        p.root.scale.setScalar(scale);
+        if (sp >= 1) {
+          p.state = "idle";
+          p.idleT = 0.5 + Math.random() * 1.2;
+          p.root.position.y = groundHeight(p.root.position.x, p.root.position.z);
+          p.root.rotation.x = 0;
+          p.root.scale.setScalar(1);
+        }
+        continue;
+      }
+
+      if (p.state === "idle") {
+        p.bob.position.y = Math.sin(elapsed * 2.2 + p.bobPhase) * 0.012;
+        wingFlap = Math.sin(elapsed * 1.4 + p.bobPhase) * 0.05;
+        p.idleT -= dt;
+        if (p.idleT <= 0) {
+          pickWanderTarget(p);
+          p.state = "walk";
+        }
+      } else if (p.state === "walk") {
+        var pos2 = new THREE.Vector2(p.root.position.x, p.root.position.z);
+        var dir = new THREE.Vector2().subVectors(p.target, pos2);
+        var dist = dir.length();
+        if (dist < 0.12) {
+          if (p.foodRef) {
+            if (p.foodRef.active) {
+              p.foodRef.active = false;
+              consumeFood(p.foodRef);
+            }
+            p.foodRef = null;
+          }
+          p.state = "idle";
+          p.idleT = 1.2 + Math.random() * 2.2;
+        } else {
+          dir.normalize();
+          var mv = WALK_SPEED * (0.85 + windFactor * 0.25) * dt;
+          var nx = p.root.position.x + dir.x * mv;
+          var nz = p.root.position.z + dir.y * mv;
+          p.root.position.x = nx; p.root.position.z = nz;
+          p.root.position.y = groundHeight(nx, nz);
+          faceToward(p.root, dir.x, dir.y, dt, 6);
+          p.bob.rotation.z = Math.sin(elapsed * 9) * 0.12;
+          p.bob.position.y = Math.abs(Math.sin(elapsed * 9)) * 0.025;
+          wingFlap = Math.sin(elapsed * 6) * 0.08;
+        }
+      } else if (p.state === "fly") {
+        p.flightT += dt;
+        var fp = Math.min(p.flightT / p.flightDuration, 1);
+        var x = THREE.MathUtils.lerp(p.flightStart.x, p.target.x, fp);
+        var z = THREE.MathUtils.lerp(p.flightStart.y, p.target.y, fp);
+        var arcH = Math.sin(fp * Math.PI) * 2.4;
+        p.root.position.set(x, groundHeight(x, z) + 0.5 + arcH, z);
+        var ddx = p.target.x - p.flightStart.x, ddz = p.target.y - p.flightStart.y;
+        faceToward(p.root, ddx, ddz, dt, 10);
+        p.root.rotation.z = Math.sin(elapsed * 3) * 0.12;
+        wingFlap = Math.sin(elapsed * 22) * 0.85;
+        if (fp >= 1) {
+          p.root.position.y = groundHeight(p.target.x, p.target.y);
+          p.root.rotation.z = 0;
+          if (p.foodRef) {
+            if (p.foodRef.active) {
+              p.foodRef.active = false;
+              consumeFood(p.foodRef);
+            }
+            p.foodRef = null;
+          }
+          p.state = "idle";
+          p.idleT = 0.8 + Math.random() * 1.6;
+        }
+      }
+
+      p.leftWingPivot.rotation.z = wingFlap;
+      p.rightWingPivot.rotation.z = -wingFlap;
+    }
+  }
+
+  function triggerSpin(index) {
+    var p = puffins[index];
+    if (!p || p.state === "spin" || p.state === "fly") return;
+    p.state = "spin";
+    p.spinT = 0;
+    showToast("扑棱一下,翻了个跟头");
+  }
+
+  // ===============================================================
+  // 9. Feeding (click ground to drop food; puffins react by distance)
+  // ===============================================================
+  var foods = [];
+  function spawnFood(x, z) {
+    var g = new THREE.Group();
+    var n = 3 + Math.floor(Math.random() * 2);
+    for (var i = 0; i < n; i++) {
+      var fish = new THREE.Mesh(
+        new THREE.ConeGeometry(0.035, 0.12, 4),
+        new THREE.MeshStandardMaterial({ color: "#8FB6C9", flatShading: true, metalness: 0.3, roughness: 0.4 })
+      );
+      var a = Math.random() * Math.PI * 2, r = Math.random() * 0.13;
+      fish.position.set(Math.cos(a) * r, 0.06, Math.sin(a) * r);
+      fish.rotation.z = Math.PI / 2;
+      fish.rotation.y = Math.random() * Math.PI;
+      fish.castShadow = true;
+      g.add(fish);
+    }
+    var y = groundHeight(x, z);
+    g.position.set(x, y, z);
+    g.scale.setScalar(0.001);
+    scene.add(g);
+
+    var food = { group: g, pos: new THREE.Vector2(x, z), active: true, born: performance.now(), eaten: false, skipPopIn: false };
+    foods.push(food);
+    showToast("撒了一点小鱼干");
+    attractPuffinsToFood(food);
+  }
+
+  function attractPuffinsToFood(food) {
+    var x = food.pos.x, z = food.pos.y;
+    var attracted = 0;
+    var maxAttract = 8;
+    var order = puffins.map(function (_, idx) { return idx; });
+    order.sort(function (ia, ib) {
+      var da = puffins[ia].root.position.distanceTo(new THREE.Vector3(x, puffins[ia].root.position.y, z));
+      var db = puffins[ib].root.position.distanceTo(new THREE.Vector3(x, puffins[ib].root.position.y, z));
+      return da - db;
+    });
+    for (var oi = 0; oi < order.length && attracted < maxAttract; oi++) {
+      var p = puffins[order[oi]];
+      if (p.state === "idle" || p.state === "walk") {
+        sendToFood(p, food);
+        attracted++;
+      }
+    }
+  }
+
+  function consumeFood(food) {
+    food.eaten = true;
+  }
+
+  function updateFood(dt) {
+    var now = performance.now();
+    for (var i = foods.length - 1; i >= 0; i--) {
+      var f = foods[i];
+      var age = (now - f.born) / 1000;
+      if (!f.skipPopIn && age < 0.3) {
+        var p = age / 0.3;
+        f.group.scale.setScalar(1 - Math.pow(1 - p, 3));
+      } else if (f.eaten || age > 22) {
+        var fp = f._fadeP === undefined ? 0 : f._fadeP;
+        fp += dt * 3;
+        f._fadeP = fp;
+        f.group.scale.setScalar(Math.max(0, 1 - fp));
+        if (fp >= 1) {
+          scene.remove(f.group);
+          foods.splice(i, 1);
+        }
+      } else {
+        f.group.scale.setScalar(1);
+      }
+    }
+  }
+
+  // ===============================================================
+  // 9b. Fish — swim in ponds, jump ashore on click, become puffin food
+  // ===============================================================
+  var fishList = [];
+  var fishClickTargets = [];
+
+  function buildFishMesh() {
+    var g = new THREE.Group();
+    var body = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.07, 1),
+      new THREE.MeshStandardMaterial({ color: "#8FC4D9", flatShading: true, roughness: 0.5, metalness: 0.15 })
+    );
+    body.scale.set(1, 0.75, 1.9);
+    g.add(body);
+
+    var belly = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.045, 0),
+      new THREE.MeshStandardMaterial({ color: "#E8F4F8", flatShading: true })
+    );
+    belly.scale.set(0.9, 0.6, 1.5);
+    belly.position.y = -0.025;
+    g.add(belly);
+
+    var tailPivot = new THREE.Group();
+    tailPivot.position.z = -0.13;
+    var tail = new THREE.Mesh(
+      new THREE.ConeGeometry(0.05, 0.09, 4),
+      new THREE.MeshStandardMaterial({ color: "#6FA9C0", flatShading: true })
+    );
+    tail.rotation.x = Math.PI / 2;
+    tail.position.z = -0.04;
+    tailPivot.add(tail);
+    g.add(tailPivot);
+
+    return { root: g, tailPivot: tailPivot };
+  }
+
+  function spawnFish(pond) {
+    var built = buildFishMesh();
+    var root = built.root;
+    var angle = Math.random() * Math.PI * 2;
+    var radius = pond.r * (0.25 + Math.random() * 0.55);
+    var x = pond.x + Math.cos(angle) * radius;
+    var z = pond.z + Math.sin(angle) * radius;
+    root.position.set(x, pond.waterY - 0.05, z);
+    scene.add(root);
+
+    var hitbox = new THREE.Mesh(
+      new THREE.SphereGeometry(0.16, 8, 8),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    hitbox.userData.type = "fish";
+    hitbox.userData.fishIndex = fishList.length;
+    root.add(hitbox);
+    fishClickTargets.push(hitbox);
+
+    fishList.push({
+      root: root, tailPivot: built.tailPivot, pond: pond,
+      angle: angle, angularSpeed: (0.25 + Math.random() * 0.3) * (Math.random() < 0.5 ? 1 : -1),
+      radius: radius, depthPhase: Math.random() * Math.PI * 2,
+      state: "swim",
+      jumpT: 0, jumpDur: 0.75,
+      startPos: new THREE.Vector3(), landPos: new THREE.Vector3()
+    });
+  }
+
+  ponds.forEach(function (pond) {
+    var count = 3 + Math.floor(Math.random() * 2);
+    for (var f = 0; f < count; f++) spawnFish(pond);
+  });
+
+  function triggerFishJump(index) {
+    var fish = fishList[index];
+    if (!fish || fish.state !== "swim") return;
+    var pond = fish.pond;
+    var dx = fish.root.position.x - pond.x;
+    var dz = fish.root.position.z - pond.z;
+    var d = Math.sqrt(dx * dx + dz * dz) || 0.001;
+    var dirX = dx / d, dirZ = dz / d;
+    var landDist = pond.r + 1.0 + Math.random() * 0.8;
+    var landX = pond.x + dirX * landDist;
+    var landZ = pond.z + dirZ * landDist;
+    fish.startPos.copy(fish.root.position);
+    fish.landPos.set(landX, groundHeight(landX, landZ), landZ);
+    fish.jumpT = 0;
+    fish.state = "jump";
+    showToast("鱼跳出了水面");
+  }
+
+  function updateFish(dt, elapsed) {
+    for (var i = 0; i < fishList.length; i++) {
+      var f = fishList[i];
+      if (f.state === "swim") {
+        f.angle += f.angularSpeed * dt;
+        var x = f.pond.x + Math.cos(f.angle) * f.radius;
+        var z = f.pond.z + Math.sin(f.angle) * f.radius;
+        var y = f.pond.waterY - 0.05 + Math.sin(elapsed * 2 + f.depthPhase) * 0.012;
+        f.root.position.set(x, y, z);
+        var heading = f.angle + (f.angularSpeed > 0 ? Math.PI / 2 : -Math.PI / 2);
+        f.root.rotation.y = heading;
+        f.tailPivot.rotation.y = Math.sin(elapsed * 9 + f.depthPhase) * 0.6;
+      } else if (f.state === "jump") {
+        f.jumpT += dt;
+        var fp = Math.min(f.jumpT / f.jumpDur, 1);
+        var x2 = THREE.MathUtils.lerp(f.startPos.x, f.landPos.x, fp);
+        var z2 = THREE.MathUtils.lerp(f.startPos.z, f.landPos.z, fp);
+        var arc = Math.sin(fp * Math.PI) * 1.4;
+        f.root.position.set(x2, THREE.MathUtils.lerp(f.startPos.y, f.landPos.y, fp) + arc, z2);
+        f.root.rotation.x += dt * 14;
+        if (fp >= 1) {
+          f.root.rotation.x = 0;
+          f.root.position.copy(f.landPos);
+          var food = {
+            group: f.root, pos: new THREE.Vector2(f.landPos.x, f.landPos.z),
+            active: true, born: performance.now(), eaten: false, skipPopIn: true
+          };
+          foods.push(food);
+          attractPuffinsToFood(food);
+          f.state = "gone";
+          f.pond.pendingRespawnAt = performance.now() + 3000 + Math.random() * 3000;
+        }
+      }
+    }
+  }
+
+  function updatePondRespawns(now) {
+    for (var i = 0; i < ponds.length; i++) {
+      var pond = ponds[i];
+      if (pond.pendingRespawnAt && now >= pond.pendingRespawnAt) {
+        spawnFish(pond);
+        pond.pendingRespawnAt = null;
+      }
+    }
+  }
+
+  // ===============================================================
+  // 10. Pointer interaction
+  // ===============================================================
+  var raycaster = new THREE.Raycaster();
+  var pointerNDC = new THREE.Vector2();
+  var downPos = null;
+
+  function setPointerFromEvent(e) {
+    var cx = e.clientX, cy = e.clientY;
+    pointerNDC.x = (cx / window.innerWidth) * 2 - 1;
+    pointerNDC.y = -(cy / window.innerHeight) * 2 + 1;
+  }
+
+  renderer.domElement.addEventListener("pointerdown", function (e) {
+    downPos = { x: e.clientX, y: e.clientY, button: e.button };
+  });
+
+  renderer.domElement.addEventListener("pointerup", function (e) {
+    if (!downPos || e.button !== 0) { downPos = null; return; }
+    var dx = e.clientX - downPos.x, dy = e.clientY - downPos.y;
+    downPos = null;
+    if (Math.sqrt(dx * dx + dy * dy) > 6) return;
+
+    setPointerFromEvent(e);
+    raycaster.setFromCamera(pointerNDC, camera);
+
+    var hits = raycaster.intersectObjects(clickTargets, false);
+    if (hits.length > 0) {
+      triggerSpin(hits[0].object.userData.puffinIndex);
+      return;
+    }
+    var fishHits = raycaster.intersectObjects(fishClickTargets, false);
+    if (fishHits.length > 0) {
+      triggerFishJump(fishHits[0].object.userData.fishIndex);
+      return;
+    }
+    var groundHits = raycaster.intersectObject(ground, false);
+    if (groundHits.length > 0) {
+      var gx = groundHits[0].point.x, gz = groundHits[0].point.z;
+      if (!pointInAnyPond(gx, gz)) spawnFood(gx, gz);
+    }
+  });
+
+  // ===============================================================
+  // 11. UI wiring
+  // ===============================================================
+  var windRange = document.getElementById("windRange");
+  var windText = document.getElementById("windText");
+  var currentWind01 = 0.24;
+
+  function windLabel(v) {
+    if (v < 8) return "无风";
+    if (v < 35) return "微风";
+    if (v < 70) return "劲风";
+    return "暴风";
+  }
+  function applyWindUI(v) {
+    windRange.style.setProperty("--fill", v + "%");
+    windText.textContent = windLabel(v);
+  }
+  applyWindUI(windRange.value);
+  windRange.addEventListener("input", function () {
+    var v = parseFloat(windRange.value);
+    currentWind01 = v / 100;
+    applyWindUI(v);
+  });
+
+  var dayToggle = document.getElementById("dayToggle");
+  var dayToggleText = document.getElementById("dayToggleText");
+  var isNight = false;
+  dayToggle.addEventListener("click", function () {
+    isNight = !isNight;
+    dayNight.target = isNight ? 1 : 0;
+    dayToggle.classList.toggle("night", isNight);
+    dayToggleText.textContent = isNight ? "极夜" : "白昼";
+  });
+
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 1400);
+  }
+
+  // ===============================================================
+  // 12. Loading overlay
+  // ===============================================================
+  var loadingEl = document.getElementById("loading");
+  var loadBar = document.getElementById("loadBar");
+  var fakeProgress = 0, loadingDone = false;
+  var loadingInterval = setInterval(function () {
+    fakeProgress += (100 - fakeProgress) * 0.25 + 2;
+    if (fakeProgress > 96) fakeProgress = 96;
+    loadBar.style.width = fakeProgress + "%";
+  }, 90);
+  function finishLoading() {
+    if (loadingDone) return;
+    loadingDone = true;
+    clearInterval(loadingInterval);
+    loadBar.style.width = "100%";
+    setTimeout(function () {
+      loadingEl.classList.add("hide");
+      setTimeout(function () { loadingEl.style.display = "none"; }, 650);
+    }, 200);
+  }
+
+  // ===============================================================
+  // 13. Animation loop
+  // ===============================================================
+  var clock = new THREE.Clock();
+  var frameCount = 0;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    var dt = Math.min(clock.getDelta(), 0.05);
+    var elapsed = clock.getElapsedTime();
+
+    auroraUniforms.uTime.value = elapsed;
+    updateDayNight(dt);
+    updatePuffins(dt, currentWind01, elapsed);
+    updateFish(dt, elapsed);
+    updatePondRespawns(performance.now());
+    updateFood(dt);
+    updateSnow(dt, currentWind01);
+
+    controls.update();
+    renderer.render(scene, camera);
+
+    frameCount++;
+    if (frameCount === 3) finishLoading();
+  }
+  animate();
+})();
+</script>
+</body>
+</html>
