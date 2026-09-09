@@ -1025,8 +1025,6 @@
     attractPuffinsToFood(food);
   }
 
-  var PUFFIN_FOOD_RANGE = 38;
-
   function attractPuffinsToFood(food) {
     var x = food.pos.x, z = food.pos.y;
     var attracted = 0;
@@ -1039,11 +1037,10 @@
     });
     for (var oi = 0; oi < order.length && attracted < maxAttract; oi++) {
       var p = puffins[order[oi]];
-      if (p.state !== "idle" && p.state !== "walk") continue;
-      var d = p.root.position.distanceTo(new THREE.Vector3(x, p.root.position.y, z));
-      if (d > PUFFIN_FOOD_RANGE) continue;
-      sendToFood(p, food);
-      attracted++;
+      if (p.state === "idle" || p.state === "walk") {
+        sendToFood(p, food);
+        attracted++;
+      }
     }
   }
 
@@ -1256,8 +1253,6 @@
   var whales = [];
   var whaleClickTargets = [];
   var MIN_WHALE_SCALE = 0.42, MAX_WHALE_SCALE = 1.25, BASE_WHALE_SCALE = 1.0;
-  var WHALE_MODEL_SCALE = 3.0; // overall model size multiplier, independent of the grow/shrink mechanic above
-  var DIVE_DEPTH = 2.2 * WHALE_MODEL_SCALE; // must submerge past the model's own height, or it pokes above water
   var SPOUT_SHRINK = 0.12, FEED_GROW = 0.16;
   var WHALE_SWIM_SPEED = 2.6;
 
@@ -1355,15 +1350,12 @@
     showToast("扑哧一声喷了个水柱");
   }
 
-  var WHALE_FOOD_RANGE = 55;
-
   function attractWhaleToFood(food) {
     var best = null, bestD = Infinity;
     for (var i = 0; i < whales.length; i++) {
       var w = whales[i];
       if (w.state !== "present") continue;
       var d = w.pos.distanceTo(food.pos);
-      if (d > WHALE_FOOD_RANGE) continue;
       if (d < bestD) { bestD = d; best = w; }
     }
     if (best) {
@@ -1382,7 +1374,7 @@
         w.timer -= dt;
         if (w.timer <= 0) {
           pickWhaleSurfacePos(w);
-          var startY = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor) - DIVE_DEPTH;
+          var startY = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor) - 2.2;
           w.root.position.set(w.pos.x, startY, w.pos.y);
           w.root.rotation.y = Math.random() * Math.PI * 2;
           w.root.visible = true;
@@ -1397,8 +1389,8 @@
         w.riseT += dt;
         var rp = Math.min(w.riseT / w.riseDur, 1);
         var surfY = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor);
-        w.root.position.y = THREE.MathUtils.lerp(surfY - DIVE_DEPTH, surfY, easeOutCubic(rp));
-        w.root.scale.setScalar(w.scale * WHALE_MODEL_SCALE);
+        w.root.position.y = THREE.MathUtils.lerp(surfY - 2.2, surfY, easeOutCubic(rp));
+        w.root.scale.setScalar(w.scale);
         if (rp >= 1) { w.state = "present"; w.presentTimer = 6 + Math.random() * 6; }
         continue;
       }
@@ -1431,7 +1423,7 @@
         w.root.position.z = w.pos.y;
         w.root.position.y = surfY2 + Math.sin(elapsed * 1.1 + w.bobPhase) * 0.04;
         w.tailPivot.rotation.x = Math.sin(elapsed * 2.2 + w.bobPhase) * 0.18 * (w.state === "feeding" ? 2 : 1);
-        w.root.scale.setScalar(w.scale * WHALE_MODEL_SCALE);
+        w.root.scale.setScalar(w.scale);
 
         w.presentTimer -= dt;
         if (w.presentTimer <= 0 && w.state === "present") {
@@ -1446,8 +1438,8 @@
         w.diveT += dt;
         var dp = Math.min(w.diveT / w.diveDur, 1);
         var surfY3 = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor);
-        w.root.position.y = THREE.MathUtils.lerp(surfY3, surfY3 - DIVE_DEPTH, easeInCubic(dp));
-        w.root.scale.setScalar(w.scale * WHALE_MODEL_SCALE);
+        w.root.position.y = THREE.MathUtils.lerp(surfY3, surfY3 - 2.2, easeInCubic(dp));
+        w.root.scale.setScalar(w.scale);
         if (dp >= 1) {
           w.state = "hidden";
           w.root.visible = false;

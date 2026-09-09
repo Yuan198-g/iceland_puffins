@@ -125,15 +125,13 @@
 
 <div class="hud" id="title-block">
   <div class="eyebrow">极夜海雀</div>
-  <div class="sub">风从冰原上刮过,海雀们缩着脖子站在雪地里,远处的海面偶尔有鲸鱼浮出来。</div>
+  <div class="sub">风从冰原上刮过,海雀们缩着脖子站在雪地里。</div>
 </div>
 
 <div class="hud" id="hint">
   <span><b>点地面</b> 喂食</span>
   <span><b>点海雀</b> 翻个跟头</span>
   <span><b>点湖里的鱼</b> 吓它跳上岸</span>
-  <span><b>点鲸鱼</b> 喷水(会变小)</span>
-  <span><b>点海面</b> 投喂(它会变大)</span>
   <span><b>拖动</b> 旋转视角</span>
   <span><b>右键/双指</b> 平移</span>
   <span><b>滚轮</b> 缩放</span>
@@ -168,7 +166,7 @@
   var camera = new THREE.PerspectiveCamera(
     46, window.innerWidth / window.innerHeight, 0.1, 600
   );
-  camera.position.set(6, 13, 30);
+  camera.position.set(11, 6.5, 14);
 
   var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -181,9 +179,9 @@
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.minDistance = 4;
-  controls.maxDistance = 190;
+  controls.maxDistance = 46;
   controls.maxPolarAngle = Math.PI * 0.495;
-  controls.target.set(0, 0.4, 5);
+  controls.target.set(0, 0.6, 0);
   controls.update();
 
   window.addEventListener("resize", function () {
@@ -192,82 +190,13 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  // World layout: north = glacier/land (puffins, ponds), south = open sea (whales).
-  // The coastline is a jagged noise curve along X, not a straight line — reads
-  // more like a real fjord coast than a ruler-straight border.
-  var WORLD_HALF_WIDTH = 220;  // world spans X: -220..220 (mesh + fog only, keeps the edge out of reach)
-  var LAND_FAR_Z = 220;        // land's north edge (mesh only)
-  var OCEAN_FAR_Z = -230;      // ocean's south edge (mesh only)
-  var WORLD_RADIUS = 220;      // kept for snowfall spread sizing
-
-  // Where gameplay content (puffins, ponds, rocks, whales, floes, mountains)
-  // actually lives — deliberately much smaller than the mesh extents above, so
-  // the scene stays cozy instead of everything scattering across 220 units.
-  var PLAY_HALF_WIDTH = 120;
-  var PLAY_LAND_FAR_Z = 120;
-  var PLAY_OCEAN_FAR_Z = -138;
-
-  function coastlineZ(x) {
-    return Math.sin(x * 0.12) * 3.2 + Math.sin(x * 0.05 + 1.3) * 2.4 + Math.cos(x * 0.3) * 0.8;
-  }
+  var WORLD_RADIUS = 30;
 
   function groundHeight(x, z) {
     return (
       Math.sin(x * 0.1) * Math.cos(z * 0.09) * 0.22 +
       Math.sin(x * 0.28 + z * 0.19) * 0.09
     );
-  }
-
-  // A safe land point: north of the coast with a buffer, inside the world width.
-  function randomLandPoint(minZ, maxZ) {
-    var x = (Math.random() - 0.5) * (PLAY_HALF_WIDTH - 6) * 2;
-    var lo = Math.max(minZ, coastlineZ(x) + 6);
-    var z = lo + Math.random() * Math.max(1, maxZ - lo);
-    return { x: x, z: z };
-  }
-  // A safe sea point: south of the coast with a buffer.
-  function randomSeaPoint(minZ, maxZ) {
-    var x = (Math.random() - 0.5) * (PLAY_HALF_WIDTH - 4) * 2;
-    var hi = Math.min(maxZ, coastlineZ(x) - 6);
-    var z = minZ + Math.random() * Math.max(1, hi - minZ);
-    return { x: x, z: z };
-  }
-
-  // Grid mesh spanning from the coastline out to farZ. Handles both directions —
-  // land grows toward +Z, ocean toward -Z — with matching winding either way,
-  // verified numerically before shipping (going the other direction flips which
-  // triangle order faces up, easy to get backwards by hand).
-  function makeBandGeometry(xMin, xMax, xSegs, zSegs, coastFn, farZ) {
-    var geo = new THREE.BufferGeometry();
-    var positions = [];
-    for (var xi = 0; xi <= xSegs; xi++) {
-      var x = xMin + (xMax - xMin) * (xi / xSegs);
-      var edgeZ = coastFn(x);
-      for (var zi = 0; zi <= zSegs; zi++) {
-        var t = zi / zSegs;
-        var z = edgeZ + (farZ - edgeZ) * t;
-        positions.push(x, 0, z);
-      }
-    }
-    var flip = farZ < 0;
-    var indices = [];
-    var stride = zSegs + 1;
-    for (var xi2 = 0; xi2 < xSegs; xi2++) {
-      for (var zi2 = 0; zi2 < zSegs; zi2++) {
-        var i00 = xi2 * stride + zi2, i01 = xi2 * stride + zi2 + 1;
-        var i10 = (xi2 + 1) * stride + zi2, i11 = (xi2 + 1) * stride + zi2 + 1;
-        if (!flip) {
-          indices.push(i00, i11, i10);
-          indices.push(i00, i01, i11);
-        } else {
-          indices.push(i00, i10, i11);
-          indices.push(i00, i11, i01);
-        }
-      }
-    }
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    geo.setIndex(indices);
-    return geo;
   }
 
   // ===============================================================
@@ -310,7 +239,7 @@
     })
   );
   scene.add(sky);
-  scene.fog = new THREE.Fog(skyPalette.day.bottom.getHex(), 70, 200);
+  scene.fog = new THREE.Fog(skyPalette.day.bottom.getHex(), 30, 78);
 
   // ===============================================================
   // 2. Aurora ribbon (visible mainly at night)
@@ -322,7 +251,7 @@
     uColorB: { value: new THREE.Color("#22D3EE") },
     uColorC: { value: new THREE.Color("#A78BFA") }
   };
-  var auroraGeo = new THREE.CylinderGeometry(65, 65, 26, 48, 20, true, Math.PI * 0.15, Math.PI * 0.7);
+  var auroraGeo = new THREE.CylinderGeometry(46, 46, 20, 48, 20, true, Math.PI * 0.15, Math.PI * 0.7);
   var auroraMat = new THREE.ShaderMaterial({
     uniforms: auroraUniforms,
     transparent: true,
@@ -422,19 +351,10 @@
   }
 
   // ===============================================================
-  // 5. Snow ground — the northern glacier, from the coast up to LAND_FAR_Z
+  // 5. Snow ground
   // ===============================================================
-  function jitterGeometry(geo, amount) {
-    var pos = geo.attributes.position;
-    for (var i = 0; i < pos.count; i++) {
-      pos.setX(i, pos.getX(i) + (Math.random() - 0.5) * amount);
-      pos.setY(i, pos.getY(i) + (Math.random() - 0.5) * amount * 0.5);
-      pos.setZ(i, pos.getZ(i) + (Math.random() - 0.5) * amount);
-    }
-    geo.computeVertexNormals();
-  }
-
-  var groundGeo = makeBandGeometry(-WORLD_HALF_WIDTH, WORLD_HALF_WIDTH, 130, 55, coastlineZ, LAND_FAR_Z);
+  var groundGeo = new THREE.PlaneGeometry(WORLD_RADIUS * 2.6, WORLD_RADIUS * 2.6, 110, 110);
+  groundGeo.rotateX(-Math.PI / 2);
   var posAttr = groundGeo.attributes.position;
   var colors = [];
   var snowHi = new THREE.Color("#FBFDFF");
@@ -453,89 +373,14 @@
   groundGeo.computeVertexNormals();
   var ground = new THREE.Mesh(
     groundGeo,
-    new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.95, metalness: 0, side: THREE.DoubleSide })
+    new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.95, metalness: 0 })
   );
   ground.receiveShadow = true;
   ground.name = "ground";
   scene.add(ground);
 
-  // jagged pack-ice chunks tracing the coastline, replacing a single ring/torus
-  // (a torus can't follow a wiggly coast — scattered chunks read as broken ice edge)
-  // sparse and irregular on purpose: a chunk every few meters, not a solid wall
-  for (var cx = -(PLAY_HALF_WIDTH + 30); cx <= (PLAY_HALF_WIDTH + 30); cx += 3.2) {
-    if (Math.random() < 0.45) continue;
-    var jx = cx + (Math.random() - 0.5) * 1.6;
-    var jz = coastlineZ(jx) + (Math.random() - 0.5) * 0.6;
-    var coastGeo = new THREE.IcosahedronGeometry(0.22 + Math.random() * 0.28, 0);
-    jitterGeometry(coastGeo, 0.14);
-    var coastChunk = new THREE.Mesh(
-      coastGeo,
-      new THREE.MeshStandardMaterial({ color: "#EAF3FA", flatShading: true, roughness: 0.85 })
-    );
-    coastChunk.scale.y = 0.4;
-    coastChunk.position.set(jx, 0.04, jz);
-    coastChunk.rotation.y = Math.random() * Math.PI;
-    coastChunk.castShadow = true;
-    scene.add(coastChunk);
-  }
-
-  // ===============================================================
-  // 5b. Ocean — the southern sea, from the coast down to OCEAN_FAR_Z
-  // ===============================================================
-  var oceanGeo = makeBandGeometry(-WORLD_HALF_WIDTH, WORLD_HALF_WIDTH, 130, 55, coastlineZ, OCEAN_FAR_Z);
-  var oceanUniforms = {
-    uTime: { value: 0 },
-    uWind: { value: 0.12 },
-    uColorDeep: { value: new THREE.Color("#0B2A3B") },
-    uColorShallow: { value: new THREE.Color("#1E5B72") },
-    uDim: { value: 1.0 }
-  };
-  var oceanMat = new THREE.ShaderMaterial({
-    uniforms: oceanUniforms,
-    side: THREE.DoubleSide,
-    vertexShader: [
-      "uniform float uTime;",
-      "uniform float uWind;",
-      "varying float vWave;",
-      "varying vec2 vXZ;",
-      "void main(){",
-      "  vec3 pos = position;",
-      "  float w = sin(pos.x * 0.18 + uTime * 0.9) * cos(pos.z * 0.16 - uTime * 0.7);",
-      "  w += sin(pos.x * 0.4 - uTime * 1.4 + pos.z * 0.3) * 0.4;",
-      "  pos.y += w * (0.06 + uWind * 0.22);",
-      "  vWave = w;",
-      "  vXZ = pos.xz;",
-      "  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);",
-      "}"
-    ].join("\n"),
-    fragmentShader: [
-      "uniform vec3 uColorDeep;",
-      "uniform vec3 uColorShallow;",
-      "uniform float uDim;",
-      "varying float vWave;",
-      "varying vec2 vXZ;",
-      "void main(){",
-      "  float d = clamp((-vXZ.y) / 50.0, 0.0, 1.0);",
-      "  vec3 col = mix(uColorShallow, uColorDeep, d);",
-      "  col += vWave * 0.03;",
-      "  gl_FragColor = vec4(col * uDim, 1.0);",
-      "}"
-    ].join("\n")
-  });
-  var ocean = new THREE.Mesh(oceanGeo, oceanMat);
-  ocean.position.y = -0.16;
-  ocean.name = "ocean";
-  scene.add(ocean);
-
-  function oceanSurfaceY(x, z, elapsed, windStrength) {
-    var w = Math.sin(x * 0.18 + elapsed * 0.9) * Math.cos(z * 0.16 - elapsed * 0.7);
-    w += Math.sin(x * 0.4 - elapsed * 1.4 + z * 0.3) * 0.4;
-    return -0.16 + w * (0.06 + windStrength * 0.22);
-  }
-
   // Unfrozen ponds (geothermal pools stay liquid even in the polar night) —
-  // dark, semi-transparent so fish read clearly under the surface. Placed well
-  // north of the coast so they can never be confused with the sea.
+  // dark, semi-transparent so fish read clearly under the surface.
   var ponds = [];
   function addPond(x, z, r) {
     var baseY = groundHeight(x, z) + 0.01;
@@ -557,8 +402,8 @@
 
     ponds.push({ x: x, z: z, r: r, waterY: baseY, water: water, pendingRespawnAt: null });
   }
-  addPond(-16, 24, 4.6);
-  addPond(14, 15, 3.6);
+  addPond(-10, 6, 4.6);
+  addPond(9, -9, 3.6);
 
   function pointInAnyPond(x, z) {
     for (var i = 0; i < ponds.length; i++) {
@@ -569,22 +414,22 @@
     return false;
   }
 
-  // scattered rocks, staying well north of the coast
-  for (var r = 0; r < 18; r++) {
-    var rp = randomLandPoint(10, PLAY_LAND_FAR_Z - 6);
+  // scattered rocks
+  for (var r = 0; r < 16; r++) {
+    var ang = Math.random() * Math.PI * 2, rad = 6 + Math.random() * 20;
+    var rx = Math.cos(ang) * rad, rz = Math.sin(ang) * rad;
     var rock = new THREE.Mesh(
       new THREE.IcosahedronGeometry(0.15 + Math.random() * 0.25, 0),
       new THREE.MeshStandardMaterial({ color: "#6B7480", flatShading: true, roughness: 1 })
     );
-    rock.position.set(rp.x, groundHeight(rp.x, rp.z) + 0.08, rp.z);
+    rock.position.set(rx, groundHeight(rx, rz) + 0.08, rz);
     rock.rotation.set(Math.random(), Math.random(), Math.random());
     rock.castShadow = true;
     scene.add(rock);
   }
 
   // ===============================================================
-  // 6. Snow-capped mountain range — a backdrop wall along the far north
-  //    edge only. The south stays open sea all the way to the horizon.
+  // 6. Snow-capped mountain range (static ring)
   // ===============================================================
   function makeMountain(x, z, h, baseR) {
     var g = new THREE.Group();
@@ -604,67 +449,11 @@
     g.rotation.y = Math.random() * Math.PI;
     return g;
   }
-  var mountains = [];
-  function pointInAnyMountain(x, z) {
-    for (var i = 0; i < mountains.length; i++) {
-      var mt = mountains[i];
-      var dx = x - mt.x, dz = z - mt.z;
-      if (dx * dx + dz * dz < mt.r * mt.r) return true;
-    }
-    return false;
-  }
-  var MOUNTAIN_COUNT = 30;
-  for (var m = 0; m < MOUNTAIN_COUNT; m++) {
-    var mSpan = PLAY_HALF_WIDTH + 25;
-    var mx = -mSpan + (m / (MOUNTAIN_COUNT - 1)) * (mSpan * 2) + (Math.random() - 0.5) * 6;
-    var mz = PLAY_LAND_FAR_Z + 4 + Math.random() * 40;
-    var mh = 7 + Math.random() * 11;
-    var mBaseR = 3.5 + Math.random() * 3.5;
-    scene.add(makeMountain(mx, mz, mh, mBaseR));
-    mountains.push({ x: mx, z: mz, r: mBaseR });
-  }
-
-  // ===============================================================
-  // 6b. Floating ice — purely decorative, gently bobs on the swell,
-  //     scattered through the southern sea
-  // ===============================================================
-  var floes = [];
-  function makeFloe(x, z, scale) {
-    var g = new THREE.Group();
-    var chunkCount = 2 + Math.floor(Math.random() * 3);
-    for (var c = 0; c < chunkCount; c++) {
-      var chunkRadius = 0.4 + Math.random() * 0.5;
-      var chunkGeo = new THREE.IcosahedronGeometry(chunkRadius, 0);
-      jitterGeometry(chunkGeo, chunkRadius * 0.5);
-      var chunk = new THREE.Mesh(
-        chunkGeo,
-        new THREE.MeshStandardMaterial({ color: "#DCEEF5", flatShading: true, roughness: 0.75 })
-      );
-      chunk.scale.y = 0.32;
-      chunk.position.set((Math.random() - 0.5) * 1.5, 0, (Math.random() - 0.5) * 1.5);
-      chunk.rotation.y = Math.random() * Math.PI;
-      chunk.castShadow = true;
-      g.add(chunk);
-    }
-    g.position.set(x, oceanSurfaceY(x, z, 0, 0.12), z);
-    g.scale.setScalar(scale);
-    g.userData.bobPhase = Math.random() * Math.PI * 2;
-    g.userData.x = x; g.userData.z = z;
-    scene.add(g);
-    floes.push(g);
-  }
-  for (var fl = 0; fl < 20; fl++) {
-    var flp = randomSeaPoint(PLAY_OCEAN_FAR_Z + 5, -5);
-    makeFloe(flp.x, flp.z, 0.6 + Math.random() * 0.9);
-  }
-  function updateFloes(elapsed, windStrength) {
-    for (var i = 0; i < floes.length; i++) {
-      var f = floes[i];
-      var y = oceanSurfaceY(f.userData.x, f.userData.z, elapsed, windStrength);
-      f.position.y = y + Math.sin(elapsed * 1.3 + f.userData.bobPhase) * 0.03;
-      f.rotation.z = Math.sin(elapsed * 0.6 + f.userData.bobPhase) * 0.05;
-      f.rotation.x = Math.cos(elapsed * 0.5 + f.userData.bobPhase) * 0.04;
-    }
+  for (var m = 0; m < 18; m++) {
+    var mAng = (m / 18) * Math.PI * 2 + Math.random() * 0.2;
+    var mRad = 34 + Math.random() * 16;
+    var mh = 6 + Math.random() * 9;
+    scene.add(makeMountain(Math.cos(mAng) * mRad, Math.sin(mAng) * mRad, mh, 3 + Math.random() * 3));
   }
 
   // ===============================================================
@@ -820,60 +609,28 @@
     });
   }
 
-  var pspawn;
+  var puffinAng, puffinRad, px, pz;
   for (var pi = 0; pi < 13; pi++) {
-    pspawn = randomLandPoint(9, 34);
-    spawnPuffin(pspawn.x, pspawn.z);
+    puffinAng = Math.random() * Math.PI * 2;
+    puffinRad = 2 + Math.random() * 9;
+    px = Math.cos(puffinAng) * puffinRad;
+    pz = Math.sin(puffinAng) * puffinRad * 0.8 - 1;
+    spawnPuffin(px, pz);
   }
 
   function pickWanderTarget(p) {
-    for (var attempt = 0; attempt < 6; attempt++) {
-      var angle = Math.random() * Math.PI * 2;
-      var dist = 0.8 + Math.random() * WANDER_RADIUS;
-      var nx = THREE.MathUtils.clamp(p.home.x + Math.cos(angle) * dist, -PLAY_HALF_WIDTH + 3, PLAY_HALF_WIDTH - 3);
-      var nz = THREE.MathUtils.clamp(p.home.y + Math.sin(angle) * dist, 5, PLAY_LAND_FAR_Z - 3);
-      if (nz < coastlineZ(nx) + 5) continue;
-      if (pointInAnyMountain(nx, nz)) continue;
-      if (!pointInAnyPond(nx, nz)) { p.target.set(nx, nz); return; }
-    }
-    p.target.copy(p.home);
+    var angle = Math.random() * Math.PI * 2;
+    var dist = 0.8 + Math.random() * WANDER_RADIUS;
+    var nx = THREE.MathUtils.clamp(p.home.x + Math.cos(angle) * dist, -WORLD_RADIUS + 3, WORLD_RADIUS - 3);
+    var nz = THREE.MathUtils.clamp(p.home.y + Math.sin(angle) * dist, -WORLD_RADIUS + 3, WORLD_RADIUS - 3);
+    p.target.set(nx, nz);
   }
-
 
   function faceToward(root, dx, dz, dt, turnSpeed) {
     var targetAngle = Math.atan2(dx, dz);
     var da = targetAngle - root.rotation.y;
     da = Math.atan2(Math.sin(da), Math.cos(da));
     root.rotation.y += da * Math.min(1, dt * turnSpeed);
-  }
-
-  // Steers a walking puffin around any mountain whose base footprint the
-  // straight-line path toward its target would otherwise clip. Classic local
-  // obstacle-avoidance: project the mountain onto the path, and if it's close
-  // enough (both ahead and near the line) push sideways away from its center.
-  function steerAroundMountains(px, pz, dir) {
-    var steer = null;
-    for (var i = 0; i < mountains.length; i++) {
-      var mt = mountains[i];
-      var toX = mt.x - px, toZ = mt.z - pz;
-      var proj = toX * dir.x + toZ * dir.y;
-      var avoidR = mt.r + 1.8;
-      var lookAhead = 7;
-      if (proj > -avoidR && proj < lookAhead) {
-        var perpX = toX - dir.x * proj, perpZ = toZ - dir.y * proj;
-        var perpDist = Math.sqrt(perpX * perpX + perpZ * perpZ);
-        if (perpDist < avoidR) {
-          var pushX, pushZ;
-          if (perpDist > 0.001) { pushX = -perpX / perpDist; pushZ = -perpZ / perpDist; }
-          else { pushX = -dir.y; pushZ = dir.x; }
-          var strength = (avoidR - perpDist) / avoidR;
-          if (!steer) steer = { x: 0, y: 0 };
-          steer.x += pushX * strength;
-          steer.y += pushZ * strength;
-        }
-      }
-    }
-    return steer;
   }
 
   function sendToFood(p, food) {
@@ -940,12 +697,6 @@
           p.idleT = 1.2 + Math.random() * 2.2;
         } else {
           dir.normalize();
-          var avoid = steerAroundMountains(p.root.position.x, p.root.position.z, dir);
-          if (avoid) {
-            dir.x += avoid.x * 1.5;
-            dir.y += avoid.y * 1.5;
-            if (dir.lengthSq() > 0.0001) { dir.normalize(); } else { dir.set(1, 0); }
-          }
           var mv = WALK_SPEED * (0.85 + windFactor * 0.25) * dt;
           var nx = p.root.position.x + dir.x * mv;
           var nz = p.root.position.z + dir.y * mv;
@@ -1025,8 +776,6 @@
     attractPuffinsToFood(food);
   }
 
-  var PUFFIN_FOOD_RANGE = 38;
-
   function attractPuffinsToFood(food) {
     var x = food.pos.x, z = food.pos.y;
     var attracted = 0;
@@ -1039,11 +788,10 @@
     });
     for (var oi = 0; oi < order.length && attracted < maxAttract; oi++) {
       var p = puffins[order[oi]];
-      if (p.state !== "idle" && p.state !== "walk") continue;
-      var d = p.root.position.distanceTo(new THREE.Vector3(x, p.root.position.y, z));
-      if (d > PUFFIN_FOOD_RANGE) continue;
-      sendToFood(p, food);
-      attracted++;
+      if (p.state === "idle" || p.state === "walk") {
+        sendToFood(p, food);
+        attracted++;
+      }
     }
   }
 
@@ -1210,280 +958,6 @@
   }
 
   // ===============================================================
-  // 9c. Particle bursts — reused for whale spout + surface/dive splash
-  // ===============================================================
-  var particles = [];
-  function spawnBurst(originVec3, count, colorHex, speedMin, speedMax, spread) {
-    for (var i = 0; i < count; i++) {
-      var m = new THREE.Mesh(
-        new THREE.SphereGeometry(0.035 + Math.random() * 0.03, 5, 5),
-        new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.9 })
-      );
-      m.position.copy(originVec3);
-      var ang = Math.random() * Math.PI * 2;
-      var upSpeed = speedMin + Math.random() * (speedMax - speedMin);
-      var outSpeed = Math.random() * spread;
-      var vel = new THREE.Vector3(Math.cos(ang) * outSpeed, upSpeed, Math.sin(ang) * outSpeed);
-      scene.add(m);
-      particles.push({ mesh: m, vel: vel, life: 0.5 + Math.random() * 0.4, maxLife: 0.9 });
-    }
-  }
-  function updateParticles(dt) {
-    for (var i = particles.length - 1; i >= 0; i--) {
-      var p = particles[i];
-      p.vel.y -= 2.4 * dt;
-      p.mesh.position.addScaledVector(p.vel, dt);
-      p.life -= dt;
-      var lifeFrac = Math.max(0, p.life / p.maxLife);
-      p.mesh.material.opacity = lifeFrac * 0.9;
-      p.mesh.scale.setScalar(0.6 + (1 - lifeFrac) * 0.8);
-      if (p.life <= 0) {
-        scene.remove(p.mesh);
-        p.mesh.geometry.dispose();
-        p.mesh.material.dispose();
-        particles.splice(i, 1);
-      }
-    }
-  }
-
-  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-  function easeInCubic(t) { return t * t * t; }
-
-  // ===============================================================
-  // 9d. Whales — surface occasionally, click to spout (shrinks),
-  //     feed them in the water to grow them back
-  // ===============================================================
-  var whales = [];
-  var whaleClickTargets = [];
-  var MIN_WHALE_SCALE = 0.42, MAX_WHALE_SCALE = 1.25, BASE_WHALE_SCALE = 1.0;
-  var WHALE_MODEL_SCALE = 3.0; // overall model size multiplier, independent of the grow/shrink mechanic above
-  var DIVE_DEPTH = 2.2 * WHALE_MODEL_SCALE; // must submerge past the model's own height, or it pokes above water
-  var SPOUT_SHRINK = 0.12, FEED_GROW = 0.16;
-  var WHALE_SWIM_SPEED = 2.6;
-
-  function buildWhale() {
-    var root = new THREE.Group();
-    var bob = new THREE.Group();
-    root.add(bob);
-
-    var dark = mat("#3A4F5C");
-    var light = mat("#DCE6E8");
-    var finMat = mat("#33454F");
-
-    var body = new THREE.Mesh(new THREE.IcosahedronGeometry(0.75, 1), dark);
-    body.scale.set(0.62, 0.55, 1.65);
-    body.position.y = 0.5;
-    body.castShadow = true;
-    bob.add(body);
-
-    var belly = new THREE.Mesh(new THREE.IcosahedronGeometry(0.55, 1), light);
-    belly.scale.set(0.55, 0.4, 1.4);
-    belly.position.set(0, 0.28, 0.05);
-    bob.add(belly);
-
-    var dorsal = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.28, 4), dark);
-    dorsal.position.set(0, 0.92, 0.15);
-    dorsal.rotation.x = 0.15;
-    bob.add(dorsal);
-
-    var tailPivot = new THREE.Group();
-    tailPivot.position.set(0, 0.42, -1.15);
-    bob.add(tailPivot);
-    [-1, 1].forEach(function (side) {
-      var fluke = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.55, 4), dark);
-      fluke.rotation.z = Math.PI / 2;
-      fluke.position.set(side * 0.28, 0, 0);
-      fluke.scale.set(1, 1, 0.35);
-      tailPivot.add(fluke);
-    });
-
-    [-1, 1].forEach(function (side) {
-      var fin = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.42, 4), finMat);
-      fin.rotation.z = side * (Math.PI / 2 - 0.3);
-      fin.position.set(side * 0.38, 0.35, 0.35);
-      fin.scale.set(1, 1, 0.3);
-      bob.add(fin);
-    });
-
-    var blowholeLocal = new THREE.Vector3(0, 0.93, 0.55);
-    return { root: root, bob: bob, tailPivot: tailPivot, blowholeLocal: blowholeLocal };
-  }
-
-  function spawnWhaleSlot(index) {
-    var built = buildWhale();
-    var root = built.root;
-    root.visible = false;
-    scene.add(root);
-
-    var hitbox = new THREE.Mesh(
-      new THREE.BoxGeometry(1.6, 1.2, 3.0),
-      new THREE.MeshBasicMaterial({ visible: false })
-    );
-    hitbox.position.y = 0.5;
-    hitbox.userData.type = "whale";
-    hitbox.userData.whaleIndex = index;
-    root.add(hitbox);
-    whaleClickTargets.push(hitbox);
-
-    whales.push({
-      root: root, bob: built.bob, tailPivot: built.tailPivot, blowholeLocal: built.blowholeLocal,
-      state: "hidden",
-      timer: 2 + index * 5 + Math.random() * 6,
-      pos: new THREE.Vector2(0, 0),
-      targetPos: new THREE.Vector2(0, 0),
-      riseT: 0, riseDur: 1.6,
-      diveT: 0, diveDur: 1.6,
-      presentTimer: 0,
-      scale: BASE_WHALE_SCALE,
-      foodRef: null,
-      bobPhase: Math.random() * Math.PI * 2
-    });
-  }
-  for (var wi = 0; wi < 3; wi++) spawnWhaleSlot(wi);
-
-  function pickWhaleSurfacePos(w) {
-    var sp = randomSeaPoint(PLAY_OCEAN_FAR_Z + 8, -10);
-    w.pos.set(sp.x, sp.z);
-  }
-
-  function triggerWhaleSpout(index) {
-    var w = whales[index];
-    if (!w || (w.state !== "present" && w.state !== "feeding")) return;
-    w.scale = Math.max(MIN_WHALE_SCALE, w.scale - SPOUT_SHRINK);
-    var worldPos = w.root.localToWorld(w.blowholeLocal.clone());
-    spawnBurst(worldPos, 14, "#F4FAFC", 1.2, 2.6, 0.35);
-    showToast("扑哧一声喷了个水柱");
-  }
-
-  var WHALE_FOOD_RANGE = 55;
-
-  function attractWhaleToFood(food) {
-    var best = null, bestD = Infinity;
-    for (var i = 0; i < whales.length; i++) {
-      var w = whales[i];
-      if (w.state !== "present") continue;
-      var d = w.pos.distanceTo(food.pos);
-      if (d > WHALE_FOOD_RANGE) continue;
-      if (d < bestD) { bestD = d; best = w; }
-    }
-    if (best) {
-      best.foodRef = food;
-      best.targetPos.copy(food.pos);
-      best.state = "feeding";
-      best.presentTimer = Math.max(best.presentTimer, 6);
-    }
-  }
-
-  function updateWhales(dt, elapsed, windFactor) {
-    for (var i = 0; i < whales.length; i++) {
-      var w = whales[i];
-
-      if (w.state === "hidden") {
-        w.timer -= dt;
-        if (w.timer <= 0) {
-          pickWhaleSurfacePos(w);
-          var startY = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor) - DIVE_DEPTH;
-          w.root.position.set(w.pos.x, startY, w.pos.y);
-          w.root.rotation.y = Math.random() * Math.PI * 2;
-          w.root.visible = true;
-          w.riseT = 0;
-          w.state = "rising";
-          spawnBurst(new THREE.Vector3(w.pos.x, oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor), w.pos.y), 10, "#EAF6FB", 0.6, 1.6, 0.7);
-        }
-        continue;
-      }
-
-      if (w.state === "rising") {
-        w.riseT += dt;
-        var rp = Math.min(w.riseT / w.riseDur, 1);
-        var surfY = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor);
-        w.root.position.y = THREE.MathUtils.lerp(surfY - DIVE_DEPTH, surfY, easeOutCubic(rp));
-        w.root.scale.setScalar(w.scale * WHALE_MODEL_SCALE);
-        if (rp >= 1) { w.state = "present"; w.presentTimer = 6 + Math.random() * 6; }
-        continue;
-      }
-
-      if (w.state === "present" || w.state === "feeding") {
-        var surfY2 = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor);
-        if (w.state === "feeding") {
-          var dir = new THREE.Vector2().subVectors(w.targetPos, w.pos);
-          var dist = dir.length();
-          if (dist < 0.4) {
-            if (w.foodRef) {
-              if (w.foodRef.active) { w.foodRef.active = false; consumeFood(w.foodRef); }
-              w.foodRef = null;
-            }
-            w.scale = Math.min(MAX_WHALE_SCALE, w.scale + FEED_GROW);
-            w.state = "present";
-            w.presentTimer = 3 + Math.random() * 3;
-            showToast("鲸鱼吃到啦,长大了一点");
-          } else {
-            dir.normalize();
-            var mv = WHALE_SWIM_SPEED * dt;
-            w.pos.x += dir.x * mv; w.pos.y += dir.y * mv;
-            var heading = Math.atan2(dir.x, dir.y);
-            var da = heading - w.root.rotation.y;
-            da = Math.atan2(Math.sin(da), Math.cos(da));
-            w.root.rotation.y += da * Math.min(1, dt * 3);
-          }
-        }
-        w.root.position.x = w.pos.x;
-        w.root.position.z = w.pos.y;
-        w.root.position.y = surfY2 + Math.sin(elapsed * 1.1 + w.bobPhase) * 0.04;
-        w.tailPivot.rotation.x = Math.sin(elapsed * 2.2 + w.bobPhase) * 0.18 * (w.state === "feeding" ? 2 : 1);
-        w.root.scale.setScalar(w.scale * WHALE_MODEL_SCALE);
-
-        w.presentTimer -= dt;
-        if (w.presentTimer <= 0 && w.state === "present") {
-          w.state = "diving";
-          w.diveT = 0;
-          spawnBurst(new THREE.Vector3(w.pos.x, surfY2, w.pos.y), 10, "#EAF6FB", 0.6, 1.6, 0.7);
-        }
-        continue;
-      }
-
-      if (w.state === "diving") {
-        w.diveT += dt;
-        var dp = Math.min(w.diveT / w.diveDur, 1);
-        var surfY3 = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor);
-        w.root.position.y = THREE.MathUtils.lerp(surfY3, surfY3 - DIVE_DEPTH, easeInCubic(dp));
-        w.root.scale.setScalar(w.scale * WHALE_MODEL_SCALE);
-        if (dp >= 1) {
-          w.state = "hidden";
-          w.root.visible = false;
-          w.timer = 8 + Math.random() * 10;
-        }
-      }
-    }
-  }
-
-  function spawnSeaFood(x, z) {
-    var g = new THREE.Group();
-    var n = 3 + Math.floor(Math.random() * 2);
-    for (var i = 0; i < n; i++) {
-      var chunk = new THREE.Mesh(
-        new THREE.ConeGeometry(0.06, 0.22, 4),
-        new THREE.MeshStandardMaterial({ color: "#8FB6C9", flatShading: true, metalness: 0.3, roughness: 0.4 })
-      );
-      var a = Math.random() * Math.PI * 2, r = Math.random() * 0.3;
-      chunk.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
-      chunk.rotation.z = Math.PI / 2;
-      chunk.rotation.y = Math.random() * Math.PI;
-      chunk.castShadow = true;
-      g.add(chunk);
-    }
-    var y = oceanSurfaceY(x, z, clock.getElapsedTime(), currentWind01);
-    g.position.set(x, y, z);
-    g.scale.setScalar(0.001);
-    scene.add(g);
-
-    var food = { group: g, pos: new THREE.Vector2(x, z), active: true, born: performance.now(), eaten: false, skipPopIn: false };
-    foods.push(food);
-    showToast("往海里扔了点小鱼干");
-    attractWhaleToFood(food);
-  }
-
-  // ===============================================================
   // 10. Pointer interaction
   // ===============================================================
   var raycaster = new THREE.Raycaster();
@@ -1515,36 +989,14 @@
       return;
     }
     var fishHits = raycaster.intersectObjects(fishClickTargets, false);
-    for (var fh = 0; fh < fishHits.length; fh++) {
-      var fIdx = fishHits[fh].object.userData.fishIndex;
-      var fObj = fishList[fIdx];
-      if (fObj && fObj.state === "swim") {
-        triggerFishJump(fIdx);
-        return;
-      }
+    if (fishHits.length > 0) {
+      triggerFishJump(fishHits[0].object.userData.fishIndex);
+      return;
     }
-    var whaleHits = raycaster.intersectObjects(whaleClickTargets, false);
-    for (var wh = 0; wh < whaleHits.length; wh++) {
-      var wIdx = whaleHits[wh].object.userData.whaleIndex;
-      var wObj = whales[wIdx];
-      if (wObj && (wObj.state === "present" || wObj.state === "feeding")) {
-        triggerWhaleSpout(wIdx);
-        return;
-      }
-    }
-    var surfaceHits = raycaster.intersectObjects([ground, ocean], false);
-    if (surfaceHits.length > 0) {
-      var hit = surfaceHits[0];
-      var hx = hit.point.x, hz = hit.point.z;
-      if (hit.object === ground) {
-        if (pointInAnyMountain(hx, hz)) {
-          showToast("这里是山,喂不了食");
-        } else if (!pointInAnyPond(hx, hz)) {
-          spawnFood(hx, hz);
-        }
-      } else {
-        spawnSeaFood(hx, hz);
-      }
+    var groundHits = raycaster.intersectObject(ground, false);
+    if (groundHits.length > 0) {
+      var gx = groundHits[0].point.x, gz = groundHits[0].point.z;
+      if (!pointInAnyPond(gx, gz)) spawnFood(gx, gz);
     }
   });
 
@@ -1625,28 +1077,14 @@
     var elapsed = clock.getElapsedTime();
 
     auroraUniforms.uTime.value = elapsed;
-    oceanUniforms.uTime.value = elapsed;
-    oceanUniforms.uWind.value = currentWind01;
-    oceanUniforms.uDim.value = THREE.MathUtils.lerp(1.0, 0.4, dayNight.current);
     updateDayNight(dt);
     updatePuffins(dt, currentWind01, elapsed);
     updateFish(dt, elapsed);
     updatePondRespawns(performance.now());
     updateFood(dt);
     updateSnow(dt, currentWind01);
-    updateFloes(elapsed, currentWind01);
-    updateWhales(dt, elapsed, currentWind01);
-    updateParticles(dt);
 
     controls.update();
-    var tdx = controls.target.x, tdz = controls.target.z;
-    var tdist = Math.sqrt(tdx * tdx + tdz * tdz);
-    var maxTargetDist = 150;
-    if (tdist > maxTargetDist) {
-      var pull = maxTargetDist / tdist;
-      controls.target.x *= pull;
-      controls.target.z *= pull;
-    }
     renderer.render(scene, camera);
 
     frameCount++;

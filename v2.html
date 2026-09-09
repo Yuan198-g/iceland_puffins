@@ -168,7 +168,7 @@
   var camera = new THREE.PerspectiveCamera(
     46, window.innerWidth / window.innerHeight, 0.1, 600
   );
-  camera.position.set(6, 13, 30);
+  camera.position.set(11, 6.5, 14);
 
   var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -181,9 +181,9 @@
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.minDistance = 4;
-  controls.maxDistance = 190;
+  controls.maxDistance = 58;
   controls.maxPolarAngle = Math.PI * 0.495;
-  controls.target.set(0, 0.4, 5);
+  controls.target.set(0, 0.6, 0);
   controls.update();
 
   window.addEventListener("resize", function () {
@@ -192,24 +192,9 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  // World layout: north = glacier/land (puffins, ponds), south = open sea (whales).
-  // The coastline is a jagged noise curve along X, not a straight line — reads
-  // more like a real fjord coast than a ruler-straight border.
-  var WORLD_HALF_WIDTH = 220;  // world spans X: -220..220 (mesh + fog only, keeps the edge out of reach)
-  var LAND_FAR_Z = 220;        // land's north edge (mesh only)
-  var OCEAN_FAR_Z = -230;      // ocean's south edge (mesh only)
-  var WORLD_RADIUS = 220;      // kept for snowfall spread sizing
-
-  // Where gameplay content (puffins, ponds, rocks, whales, floes, mountains)
-  // actually lives — deliberately much smaller than the mesh extents above, so
-  // the scene stays cozy instead of everything scattering across 220 units.
-  var PLAY_HALF_WIDTH = 120;
-  var PLAY_LAND_FAR_Z = 120;
-  var PLAY_OCEAN_FAR_Z = -138;
-
-  function coastlineZ(x) {
-    return Math.sin(x * 0.12) * 3.2 + Math.sin(x * 0.05 + 1.3) * 2.4 + Math.cos(x * 0.3) * 0.8;
-  }
+  var WORLD_RADIUS = 34;   // overall extent, used for snowfall spread etc.
+  var LAND_RADIUS = 18;    // snow field: puffins, ponds, rocks all stay inside this
+  var OCEAN_OUTER_RADIUS = 34; // sea extends from LAND_RADIUS out to here; mountains begin right at this edge
 
   function groundHeight(x, z) {
     return (
@@ -218,51 +203,33 @@
     );
   }
 
-  // A safe land point: north of the coast with a buffer, inside the world width.
-  function randomLandPoint(minZ, maxZ) {
-    var x = (Math.random() - 0.5) * (PLAY_HALF_WIDTH - 6) * 2;
-    var lo = Math.max(minZ, coastlineZ(x) + 6);
-    var z = lo + Math.random() * Math.max(1, maxZ - lo);
-    return { x: x, z: z };
-  }
-  // A safe sea point: south of the coast with a buffer.
-  function randomSeaPoint(minZ, maxZ) {
-    var x = (Math.random() - 0.5) * (PLAY_HALF_WIDTH - 4) * 2;
-    var hi = Math.min(maxZ, coastlineZ(x) - 6);
-    var z = minZ + Math.random() * Math.max(1, hi - minZ);
-    return { x: x, z: z };
-  }
-
-  // Grid mesh spanning from the coastline out to farZ. Handles both directions —
-  // land grows toward +Z, ocean toward -Z — with matching winding either way,
-  // verified numerically before shipping (going the other direction flips which
-  // triangle order faces up, easy to get backwards by hand).
-  function makeBandGeometry(xMin, xMax, xSegs, zSegs, coastFn, farZ) {
+  // Concentric-ring disc geometry — unlike THREE.CircleGeometry (which only has
+  // edge vertices + one center point), this gives real interior subdivision so
+  // per-vertex terrain height/color and wave shaders both look organic, not faceted.
+  function makeDiscGeometry(radius, rings, segs) {
     var geo = new THREE.BufferGeometry();
     var positions = [];
-    for (var xi = 0; xi <= xSegs; xi++) {
-      var x = xMin + (xMax - xMin) * (xi / xSegs);
-      var edgeZ = coastFn(x);
-      for (var zi = 0; zi <= zSegs; zi++) {
-        var t = zi / zSegs;
-        var z = edgeZ + (farZ - edgeZ) * t;
-        positions.push(x, 0, z);
+    positions.push(0, 0, 0);
+    for (var r = 1; r <= rings; r++) {
+      var rad = (r / rings) * radius;
+      for (var a = 0; a < segs; a++) {
+        var theta = (a / segs) * Math.PI * 2;
+        positions.push(Math.cos(theta) * rad, 0, Math.sin(theta) * rad);
       }
     }
-    var flip = farZ < 0;
     var indices = [];
-    var stride = zSegs + 1;
-    for (var xi2 = 0; xi2 < xSegs; xi2++) {
-      for (var zi2 = 0; zi2 < zSegs; zi2++) {
-        var i00 = xi2 * stride + zi2, i01 = xi2 * stride + zi2 + 1;
-        var i10 = (xi2 + 1) * stride + zi2, i11 = (xi2 + 1) * stride + zi2 + 1;
-        if (!flip) {
-          indices.push(i00, i11, i10);
-          indices.push(i00, i01, i11);
-        } else {
-          indices.push(i00, i10, i11);
-          indices.push(i00, i11, i01);
-        }
+    for (var a0 = 0; a0 < segs; a0++) {
+      var a1 = (a0 + 1) % segs;
+      indices.push(0, 1 + a0, 1 + a1);
+    }
+    for (var ring = 1; ring < rings; ring++) {
+      var ringA = 1 + (ring - 1) * segs;
+      var ringB = 1 + ring * segs;
+      for (var s = 0; s < segs; s++) {
+        var s2 = (s + 1) % segs;
+        var iA0 = ringA + s, iA1 = ringA + s2, iB0 = ringB + s, iB1 = ringB + s2;
+        indices.push(iA0, iB0, iB1);
+        indices.push(iA0, iB1, iA1);
       }
     }
     geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
@@ -310,7 +277,7 @@
     })
   );
   scene.add(sky);
-  scene.fog = new THREE.Fog(skyPalette.day.bottom.getHex(), 70, 200);
+  scene.fog = new THREE.Fog(skyPalette.day.bottom.getHex(), 34, 96);
 
   // ===============================================================
   // 2. Aurora ribbon (visible mainly at night)
@@ -322,7 +289,7 @@
     uColorB: { value: new THREE.Color("#22D3EE") },
     uColorC: { value: new THREE.Color("#A78BFA") }
   };
-  var auroraGeo = new THREE.CylinderGeometry(65, 65, 26, 48, 20, true, Math.PI * 0.15, Math.PI * 0.7);
+  var auroraGeo = new THREE.CylinderGeometry(46, 46, 20, 48, 20, true, Math.PI * 0.15, Math.PI * 0.7);
   var auroraMat = new THREE.ShaderMaterial({
     uniforms: auroraUniforms,
     transparent: true,
@@ -422,19 +389,9 @@
   }
 
   // ===============================================================
-  // 5. Snow ground — the northern glacier, from the coast up to LAND_FAR_Z
+  // 5. Snow ground
   // ===============================================================
-  function jitterGeometry(geo, amount) {
-    var pos = geo.attributes.position;
-    for (var i = 0; i < pos.count; i++) {
-      pos.setX(i, pos.getX(i) + (Math.random() - 0.5) * amount);
-      pos.setY(i, pos.getY(i) + (Math.random() - 0.5) * amount * 0.5);
-      pos.setZ(i, pos.getZ(i) + (Math.random() - 0.5) * amount);
-    }
-    geo.computeVertexNormals();
-  }
-
-  var groundGeo = makeBandGeometry(-WORLD_HALF_WIDTH, WORLD_HALF_WIDTH, 130, 55, coastlineZ, LAND_FAR_Z);
+  var groundGeo = makeDiscGeometry(LAND_RADIUS, 42, 48);
   var posAttr = groundGeo.attributes.position;
   var colors = [];
   var snowHi = new THREE.Color("#FBFDFF");
@@ -453,36 +410,25 @@
   groundGeo.computeVertexNormals();
   var ground = new THREE.Mesh(
     groundGeo,
-    new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.95, metalness: 0, side: THREE.DoubleSide })
+    new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.95, metalness: 0 })
   );
   ground.receiveShadow = true;
   ground.name = "ground";
   scene.add(ground);
 
-  // jagged pack-ice chunks tracing the coastline, replacing a single ring/torus
-  // (a torus can't follow a wiggly coast — scattered chunks read as broken ice edge)
-  // sparse and irregular on purpose: a chunk every few meters, not a solid wall
-  for (var cx = -(PLAY_HALF_WIDTH + 30); cx <= (PLAY_HALF_WIDTH + 30); cx += 3.2) {
-    if (Math.random() < 0.45) continue;
-    var jx = cx + (Math.random() - 0.5) * 1.6;
-    var jz = coastlineZ(jx) + (Math.random() - 0.5) * 0.6;
-    var coastGeo = new THREE.IcosahedronGeometry(0.22 + Math.random() * 0.28, 0);
-    jitterGeometry(coastGeo, 0.14);
-    var coastChunk = new THREE.Mesh(
-      coastGeo,
-      new THREE.MeshStandardMaterial({ color: "#EAF3FA", flatShading: true, roughness: 0.85 })
-    );
-    coastChunk.scale.y = 0.4;
-    coastChunk.position.set(jx, 0.04, jz);
-    coastChunk.rotation.y = Math.random() * Math.PI;
-    coastChunk.castShadow = true;
-    scene.add(coastChunk);
-  }
+  // pale ice-shelf rim marking where the snow field drops to the sea
+  var shoreRim = new THREE.Mesh(
+    new THREE.TorusGeometry(LAND_RADIUS, 0.22, 6, 64),
+    new THREE.MeshStandardMaterial({ color: "#EAF3FA", flatShading: true, roughness: 0.85 })
+  );
+  shoreRim.rotation.x = Math.PI / 2;
+  shoreRim.position.y = -0.05;
+  scene.add(shoreRim);
 
   // ===============================================================
-  // 5b. Ocean — the southern sea, from the coast down to OCEAN_FAR_Z
+  // 5b. Ocean — surrounds the land disc, animated wind-driven swell
   // ===============================================================
-  var oceanGeo = makeBandGeometry(-WORLD_HALF_WIDTH, WORLD_HALF_WIDTH, 130, 55, coastlineZ, OCEAN_FAR_Z);
+  var oceanGeo = makeDiscGeometry(OCEAN_OUTER_RADIUS, 36, 64);
   var oceanUniforms = {
     uTime: { value: 0 },
     uWind: { value: 0.12 },
@@ -492,7 +438,6 @@
   };
   var oceanMat = new THREE.ShaderMaterial({
     uniforms: oceanUniforms,
-    side: THREE.DoubleSide,
     vertexShader: [
       "uniform float uTime;",
       "uniform float uWind;",
@@ -515,8 +460,8 @@
       "varying float vWave;",
       "varying vec2 vXZ;",
       "void main(){",
-      "  float d = clamp((-vXZ.y) / 50.0, 0.0, 1.0);",
-      "  vec3 col = mix(uColorShallow, uColorDeep, d);",
+      "  float d = length(vXZ) / " + OCEAN_OUTER_RADIUS.toFixed(1) + ";",
+      "  vec3 col = mix(uColorShallow, uColorDeep, clamp(d, 0.0, 1.0));",
       "  col += vWave * 0.03;",
       "  gl_FragColor = vec4(col * uDim, 1.0);",
       "}"
@@ -534,8 +479,7 @@
   }
 
   // Unfrozen ponds (geothermal pools stay liquid even in the polar night) —
-  // dark, semi-transparent so fish read clearly under the surface. Placed well
-  // north of the coast so they can never be confused with the sea.
+  // dark, semi-transparent so fish read clearly under the surface.
   var ponds = [];
   function addPond(x, z, r) {
     var baseY = groundHeight(x, z) + 0.01;
@@ -557,8 +501,8 @@
 
     ponds.push({ x: x, z: z, r: r, waterY: baseY, water: water, pendingRespawnAt: null });
   }
-  addPond(-16, 24, 4.6);
-  addPond(14, 15, 3.6);
+  addPond(-10, 6, 4.6);
+  addPond(9, -9, 3.6);
 
   function pointInAnyPond(x, z) {
     for (var i = 0; i < ponds.length; i++) {
@@ -569,22 +513,22 @@
     return false;
   }
 
-  // scattered rocks, staying well north of the coast
-  for (var r = 0; r < 18; r++) {
-    var rp = randomLandPoint(10, PLAY_LAND_FAR_Z - 6);
+  // scattered rocks
+  for (var r = 0; r < 16; r++) {
+    var ang = Math.random() * Math.PI * 2, rad = 6 + Math.random() * (LAND_RADIUS - 8);
+    var rx = Math.cos(ang) * rad, rz = Math.sin(ang) * rad;
     var rock = new THREE.Mesh(
       new THREE.IcosahedronGeometry(0.15 + Math.random() * 0.25, 0),
       new THREE.MeshStandardMaterial({ color: "#6B7480", flatShading: true, roughness: 1 })
     );
-    rock.position.set(rp.x, groundHeight(rp.x, rp.z) + 0.08, rp.z);
+    rock.position.set(rx, groundHeight(rx, rz) + 0.08, rz);
     rock.rotation.set(Math.random(), Math.random(), Math.random());
     rock.castShadow = true;
     scene.add(rock);
   }
 
   // ===============================================================
-  // 6. Snow-capped mountain range — a backdrop wall along the far north
-  //    edge only. The south stays open sea all the way to the horizon.
+  // 6. Snow-capped mountain range (static ring)
   // ===============================================================
   function makeMountain(x, z, h, baseR) {
     var g = new THREE.Group();
@@ -604,44 +548,27 @@
     g.rotation.y = Math.random() * Math.PI;
     return g;
   }
-  var mountains = [];
-  function pointInAnyMountain(x, z) {
-    for (var i = 0; i < mountains.length; i++) {
-      var mt = mountains[i];
-      var dx = x - mt.x, dz = z - mt.z;
-      if (dx * dx + dz * dz < mt.r * mt.r) return true;
-    }
-    return false;
-  }
-  var MOUNTAIN_COUNT = 30;
-  for (var m = 0; m < MOUNTAIN_COUNT; m++) {
-    var mSpan = PLAY_HALF_WIDTH + 25;
-    var mx = -mSpan + (m / (MOUNTAIN_COUNT - 1)) * (mSpan * 2) + (Math.random() - 0.5) * 6;
-    var mz = PLAY_LAND_FAR_Z + 4 + Math.random() * 40;
-    var mh = 7 + Math.random() * 11;
-    var mBaseR = 3.5 + Math.random() * 3.5;
-    scene.add(makeMountain(mx, mz, mh, mBaseR));
-    mountains.push({ x: mx, z: mz, r: mBaseR });
+  for (var m = 0; m < 18; m++) {
+    var mAng = (m / 18) * Math.PI * 2 + Math.random() * 0.2;
+    var mRad = OCEAN_OUTER_RADIUS + Math.random() * 16;
+    var mh = 6 + Math.random() * 9;
+    scene.add(makeMountain(Math.cos(mAng) * mRad, Math.sin(mAng) * mRad, mh, 3 + Math.random() * 3));
   }
 
   // ===============================================================
-  // 6b. Floating ice — purely decorative, gently bobs on the swell,
-  //     scattered through the southern sea
+  // 6b. Floating ice — purely decorative, gently bobs on the swell
   // ===============================================================
   var floes = [];
   function makeFloe(x, z, scale) {
     var g = new THREE.Group();
     var chunkCount = 2 + Math.floor(Math.random() * 3);
     for (var c = 0; c < chunkCount; c++) {
-      var chunkRadius = 0.4 + Math.random() * 0.5;
-      var chunkGeo = new THREE.IcosahedronGeometry(chunkRadius, 0);
-      jitterGeometry(chunkGeo, chunkRadius * 0.5);
       var chunk = new THREE.Mesh(
-        chunkGeo,
-        new THREE.MeshStandardMaterial({ color: "#DCEEF5", flatShading: true, roughness: 0.75 })
+        new THREE.IcosahedronGeometry(0.4 + Math.random() * 0.5, 0),
+        new THREE.MeshStandardMaterial({ color: "#EAF6FB", flatShading: true, roughness: 0.7 })
       );
-      chunk.scale.y = 0.32;
-      chunk.position.set((Math.random() - 0.5) * 1.5, 0, (Math.random() - 0.5) * 1.5);
+      chunk.scale.y = 0.35;
+      chunk.position.set((Math.random() - 0.5) * 1.2, 0, (Math.random() - 0.5) * 1.2);
       chunk.rotation.y = Math.random() * Math.PI;
       chunk.castShadow = true;
       g.add(chunk);
@@ -653,9 +580,10 @@
     scene.add(g);
     floes.push(g);
   }
-  for (var fl = 0; fl < 20; fl++) {
-    var flp = randomSeaPoint(PLAY_OCEAN_FAR_Z + 5, -5);
-    makeFloe(flp.x, flp.z, 0.6 + Math.random() * 0.9);
+  for (var fl = 0; fl < 16; fl++) {
+    var flAng = Math.random() * Math.PI * 2;
+    var flRad = LAND_RADIUS + 2 + Math.random() * (OCEAN_OUTER_RADIUS - LAND_RADIUS - 4);
+    makeFloe(Math.cos(flAng) * flRad, Math.sin(flAng) * flRad, 0.6 + Math.random() * 0.9);
   }
   function updateFloes(elapsed, windStrength) {
     for (var i = 0; i < floes.length; i++) {
@@ -820,60 +748,28 @@
     });
   }
 
-  var pspawn;
+  var puffinAng, puffinRad, px, pz;
   for (var pi = 0; pi < 13; pi++) {
-    pspawn = randomLandPoint(9, 34);
-    spawnPuffin(pspawn.x, pspawn.z);
+    puffinAng = Math.random() * Math.PI * 2;
+    puffinRad = 2 + Math.random() * 9;
+    px = Math.cos(puffinAng) * puffinRad;
+    pz = Math.sin(puffinAng) * puffinRad * 0.8 - 1;
+    spawnPuffin(px, pz);
   }
 
   function pickWanderTarget(p) {
-    for (var attempt = 0; attempt < 6; attempt++) {
-      var angle = Math.random() * Math.PI * 2;
-      var dist = 0.8 + Math.random() * WANDER_RADIUS;
-      var nx = THREE.MathUtils.clamp(p.home.x + Math.cos(angle) * dist, -PLAY_HALF_WIDTH + 3, PLAY_HALF_WIDTH - 3);
-      var nz = THREE.MathUtils.clamp(p.home.y + Math.sin(angle) * dist, 5, PLAY_LAND_FAR_Z - 3);
-      if (nz < coastlineZ(nx) + 5) continue;
-      if (pointInAnyMountain(nx, nz)) continue;
-      if (!pointInAnyPond(nx, nz)) { p.target.set(nx, nz); return; }
-    }
-    p.target.copy(p.home);
+    var angle = Math.random() * Math.PI * 2;
+    var dist = 0.8 + Math.random() * WANDER_RADIUS;
+    var nx = THREE.MathUtils.clamp(p.home.x + Math.cos(angle) * dist, -LAND_RADIUS + 2, LAND_RADIUS - 2);
+    var nz = THREE.MathUtils.clamp(p.home.y + Math.sin(angle) * dist, -LAND_RADIUS + 2, LAND_RADIUS - 2);
+    p.target.set(nx, nz);
   }
-
 
   function faceToward(root, dx, dz, dt, turnSpeed) {
     var targetAngle = Math.atan2(dx, dz);
     var da = targetAngle - root.rotation.y;
     da = Math.atan2(Math.sin(da), Math.cos(da));
     root.rotation.y += da * Math.min(1, dt * turnSpeed);
-  }
-
-  // Steers a walking puffin around any mountain whose base footprint the
-  // straight-line path toward its target would otherwise clip. Classic local
-  // obstacle-avoidance: project the mountain onto the path, and if it's close
-  // enough (both ahead and near the line) push sideways away from its center.
-  function steerAroundMountains(px, pz, dir) {
-    var steer = null;
-    for (var i = 0; i < mountains.length; i++) {
-      var mt = mountains[i];
-      var toX = mt.x - px, toZ = mt.z - pz;
-      var proj = toX * dir.x + toZ * dir.y;
-      var avoidR = mt.r + 1.8;
-      var lookAhead = 7;
-      if (proj > -avoidR && proj < lookAhead) {
-        var perpX = toX - dir.x * proj, perpZ = toZ - dir.y * proj;
-        var perpDist = Math.sqrt(perpX * perpX + perpZ * perpZ);
-        if (perpDist < avoidR) {
-          var pushX, pushZ;
-          if (perpDist > 0.001) { pushX = -perpX / perpDist; pushZ = -perpZ / perpDist; }
-          else { pushX = -dir.y; pushZ = dir.x; }
-          var strength = (avoidR - perpDist) / avoidR;
-          if (!steer) steer = { x: 0, y: 0 };
-          steer.x += pushX * strength;
-          steer.y += pushZ * strength;
-        }
-      }
-    }
-    return steer;
   }
 
   function sendToFood(p, food) {
@@ -940,12 +836,6 @@
           p.idleT = 1.2 + Math.random() * 2.2;
         } else {
           dir.normalize();
-          var avoid = steerAroundMountains(p.root.position.x, p.root.position.z, dir);
-          if (avoid) {
-            dir.x += avoid.x * 1.5;
-            dir.y += avoid.y * 1.5;
-            if (dir.lengthSq() > 0.0001) { dir.normalize(); } else { dir.set(1, 0); }
-          }
           var mv = WALK_SPEED * (0.85 + windFactor * 0.25) * dt;
           var nx = p.root.position.x + dir.x * mv;
           var nz = p.root.position.z + dir.y * mv;
@@ -1025,8 +915,6 @@
     attractPuffinsToFood(food);
   }
 
-  var PUFFIN_FOOD_RANGE = 38;
-
   function attractPuffinsToFood(food) {
     var x = food.pos.x, z = food.pos.y;
     var attracted = 0;
@@ -1039,11 +927,10 @@
     });
     for (var oi = 0; oi < order.length && attracted < maxAttract; oi++) {
       var p = puffins[order[oi]];
-      if (p.state !== "idle" && p.state !== "walk") continue;
-      var d = p.root.position.distanceTo(new THREE.Vector3(x, p.root.position.y, z));
-      if (d > PUFFIN_FOOD_RANGE) continue;
-      sendToFood(p, food);
-      attracted++;
+      if (p.state === "idle" || p.state === "walk") {
+        sendToFood(p, food);
+        attracted++;
+      }
     }
   }
 
@@ -1256,8 +1143,6 @@
   var whales = [];
   var whaleClickTargets = [];
   var MIN_WHALE_SCALE = 0.42, MAX_WHALE_SCALE = 1.25, BASE_WHALE_SCALE = 1.0;
-  var WHALE_MODEL_SCALE = 3.0; // overall model size multiplier, independent of the grow/shrink mechanic above
-  var DIVE_DEPTH = 2.2 * WHALE_MODEL_SCALE; // must submerge past the model's own height, or it pokes above water
   var SPOUT_SHRINK = 0.12, FEED_GROW = 0.16;
   var WHALE_SWIM_SPEED = 2.6;
 
@@ -1342,8 +1227,9 @@
   for (var wi = 0; wi < 3; wi++) spawnWhaleSlot(wi);
 
   function pickWhaleSurfacePos(w) {
-    var sp = randomSeaPoint(PLAY_OCEAN_FAR_Z + 8, -10);
-    w.pos.set(sp.x, sp.z);
+    var ang = Math.random() * Math.PI * 2;
+    var rad = LAND_RADIUS + 4 + Math.random() * (OCEAN_OUTER_RADIUS - LAND_RADIUS - 8);
+    w.pos.set(Math.cos(ang) * rad, Math.sin(ang) * rad);
   }
 
   function triggerWhaleSpout(index) {
@@ -1355,15 +1241,12 @@
     showToast("扑哧一声喷了个水柱");
   }
 
-  var WHALE_FOOD_RANGE = 55;
-
   function attractWhaleToFood(food) {
     var best = null, bestD = Infinity;
     for (var i = 0; i < whales.length; i++) {
       var w = whales[i];
       if (w.state !== "present") continue;
       var d = w.pos.distanceTo(food.pos);
-      if (d > WHALE_FOOD_RANGE) continue;
       if (d < bestD) { bestD = d; best = w; }
     }
     if (best) {
@@ -1382,7 +1265,7 @@
         w.timer -= dt;
         if (w.timer <= 0) {
           pickWhaleSurfacePos(w);
-          var startY = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor) - DIVE_DEPTH;
+          var startY = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor) - 2.2;
           w.root.position.set(w.pos.x, startY, w.pos.y);
           w.root.rotation.y = Math.random() * Math.PI * 2;
           w.root.visible = true;
@@ -1397,8 +1280,8 @@
         w.riseT += dt;
         var rp = Math.min(w.riseT / w.riseDur, 1);
         var surfY = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor);
-        w.root.position.y = THREE.MathUtils.lerp(surfY - DIVE_DEPTH, surfY, easeOutCubic(rp));
-        w.root.scale.setScalar(w.scale * WHALE_MODEL_SCALE);
+        w.root.position.y = THREE.MathUtils.lerp(surfY - 2.2, surfY, easeOutCubic(rp));
+        w.root.scale.setScalar(w.scale);
         if (rp >= 1) { w.state = "present"; w.presentTimer = 6 + Math.random() * 6; }
         continue;
       }
@@ -1431,7 +1314,7 @@
         w.root.position.z = w.pos.y;
         w.root.position.y = surfY2 + Math.sin(elapsed * 1.1 + w.bobPhase) * 0.04;
         w.tailPivot.rotation.x = Math.sin(elapsed * 2.2 + w.bobPhase) * 0.18 * (w.state === "feeding" ? 2 : 1);
-        w.root.scale.setScalar(w.scale * WHALE_MODEL_SCALE);
+        w.root.scale.setScalar(w.scale);
 
         w.presentTimer -= dt;
         if (w.presentTimer <= 0 && w.state === "present") {
@@ -1446,8 +1329,8 @@
         w.diveT += dt;
         var dp = Math.min(w.diveT / w.diveDur, 1);
         var surfY3 = oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor);
-        w.root.position.y = THREE.MathUtils.lerp(surfY3, surfY3 - DIVE_DEPTH, easeInCubic(dp));
-        w.root.scale.setScalar(w.scale * WHALE_MODEL_SCALE);
+        w.root.position.y = THREE.MathUtils.lerp(surfY3, surfY3 - 2.2, easeInCubic(dp));
+        w.root.scale.setScalar(w.scale);
         if (dp >= 1) {
           w.state = "hidden";
           w.root.visible = false;
@@ -1515,13 +1398,9 @@
       return;
     }
     var fishHits = raycaster.intersectObjects(fishClickTargets, false);
-    for (var fh = 0; fh < fishHits.length; fh++) {
-      var fIdx = fishHits[fh].object.userData.fishIndex;
-      var fObj = fishList[fIdx];
-      if (fObj && fObj.state === "swim") {
-        triggerFishJump(fIdx);
-        return;
-      }
+    if (fishHits.length > 0) {
+      triggerFishJump(fishHits[0].object.userData.fishIndex);
+      return;
     }
     var whaleHits = raycaster.intersectObjects(whaleClickTargets, false);
     for (var wh = 0; wh < whaleHits.length; wh++) {
@@ -1537,11 +1416,7 @@
       var hit = surfaceHits[0];
       var hx = hit.point.x, hz = hit.point.z;
       if (hit.object === ground) {
-        if (pointInAnyMountain(hx, hz)) {
-          showToast("这里是山,喂不了食");
-        } else if (!pointInAnyPond(hx, hz)) {
-          spawnFood(hx, hz);
-        }
+        if (!pointInAnyPond(hx, hz)) spawnFood(hx, hz);
       } else {
         spawnSeaFood(hx, hz);
       }
@@ -1639,14 +1514,6 @@
     updateParticles(dt);
 
     controls.update();
-    var tdx = controls.target.x, tdz = controls.target.z;
-    var tdist = Math.sqrt(tdx * tdx + tdz * tdz);
-    var maxTargetDist = 150;
-    if (tdist > maxTargetDist) {
-      var pull = maxTargetDist / tdist;
-      controls.target.x *= pull;
-      controls.target.z *= pull;
-    }
     renderer.render(scene, camera);
 
     frameCount++;
