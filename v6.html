@@ -313,7 +313,9 @@
   scene.fog = new THREE.Fog(skyPalette.day.bottom.getHex(), 70, 200);
 
   // ===============================================================
-  // 2. Aurora ribbon (visible mainly at night)
+  // 2. Aurora dome (visible mainly at night) — a full sphere around the
+  //    world, colored by direction (azimuth + elevation), so it covers the
+  //    whole sky rather than reading as one horizontal ribbon
   // ===============================================================
   var auroraUniforms = {
     uTime: { value: 0 },
@@ -322,35 +324,39 @@
     uColorB: { value: new THREE.Color("#22D3EE") },
     uColorC: { value: new THREE.Color("#A78BFA") }
   };
-  var auroraGeo = new THREE.CylinderGeometry(65, 65, 26, 96, 20, true, 0, Math.PI * 2);
+  var auroraGeo = new THREE.SphereGeometry(150, 64, 40);
   var auroraMat = new THREE.ShaderMaterial({
     uniforms: auroraUniforms,
     transparent: true,
     depthWrite: false,
-    side: THREE.DoubleSide,
+    side: THREE.BackSide,
     blending: THREE.AdditiveBlending,
     vertexShader: [
-      "varying vec2 vUv;",
-      "void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }"
+      "varying vec3 vDir;",
+      "void main(){",
+      "  vDir = normalize(position);",
+      "  gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);",
+      "}"
     ].join("\n"),
     fragmentShader: [
       "uniform float uTime; uniform float uNight;",
       "uniform vec3 uColorA; uniform vec3 uColorB; uniform vec3 uColorC;",
-      "varying vec2 vUv;",
+      "varying vec3 vDir;",
       "void main(){",
-      "  float n1 = sin(vUv.x*6.28319*3.0 + uTime*0.55) * 0.5 + 0.5;",
-      "  float n2 = sin(vUv.x*6.28319*5.0 - uTime*0.8 + vUv.y*5.0) * 0.5 + 0.5;",
+      "  float az = atan(vDir.x, vDir.z);",
+      "  float el = vDir.y;",
+      "  float n1 = sin(az*3.0 + el*4.0 + uTime*0.55) * 0.5 + 0.5;",
+      "  float n2 = sin(az*5.0 - el*3.0 - uTime*0.8) * 0.5 + 0.5;",
       "  float band = smoothstep(0.15, 0.95, n1*0.6 + n2*0.4);",
-      "  vec3 col = mix(uColorA, uColorB, sin(vUv.x*6.28319*2.0 + uTime*0.3)*0.5+0.5);",
+      "  vec3 col = mix(uColorA, uColorB, sin(az*2.0 + uTime*0.3)*0.5+0.5);",
       "  col = mix(col, uColorC, n2*0.35);",
-      "  float edge = sin(vUv.y * 3.14159265);",
-      "  float alpha = band * edge * uNight * 0.85;",
+      "  float envelope = smoothstep(0.02, 0.32, el) * mix(1.0, 0.55, smoothstep(0.7, 1.0, el));",
+      "  float alpha = band * envelope * uNight * 0.85;",
       "  gl_FragColor = vec4(col, alpha);",
       "}"
     ].join("\n")
   });
   var aurora = new THREE.Mesh(auroraGeo, auroraMat);
-  aurora.position.y = 20;
   scene.add(aurora);
 
   // ===============================================================
