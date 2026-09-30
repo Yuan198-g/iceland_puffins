@@ -15,7 +15,7 @@
   }
   .wrap{ max-width:760px; margin:0 auto; }
   h1{
-    font-family:'Space Grotesk', sans-serif; font-size:28px; margin:0 0 6px;
+    font-family:'Space Grotesk', 'Noto Sans SC', sans-serif; font-size:28px; margin:0 0 6px;
     letter-spacing:.01em;
   }
   .sub{ color:var(--ink-soft); font-size:14px; margin:0 0 40px; line-height:1.6; }
@@ -35,7 +35,7 @@
     padding:18px 20px;
   }
   .card .tag{
-    font-family:'Space Grotesk', sans-serif; font-size:12px; color:var(--aurora);
+    font-family:'Space Grotesk', 'Noto Sans SC', sans-serif; font-size:12px; color:var(--aurora);
     letter-spacing:.06em; text-transform:uppercase;
   }
   .card h2{ font-size:17px; margin:4px 0 8px; }
@@ -48,20 +48,31 @@
   .card a.open:hover{ filter:brightness(1.08); }
   .filename{ font-size:11.5px; color:var(--ink-soft); opacity:.6; margin-top:8px; }
   footer{ text-align:center; color:var(--ink-soft); font-size:12px; margin-top:48px; opacity:.6; }
+
+  #langToggle{
+    position:fixed; top:18px; right:18px; z-index:5;
+    font-family:'Space Grotesk', 'Noto Sans SC', sans-serif; font-size:12px; font-weight:700;
+    color:var(--ink); background:rgba(10,18,34,.6); border:1px solid var(--card-border);
+    border-radius:999px; padding:7px 13px; cursor:pointer; letter-spacing:.04em;
+    backdrop-filter:blur(8px);
+  }
+  #langToggle:hover{ background:rgba(234,242,246,.14); }
+  #langToggle:focus-visible{ outline:2px solid var(--aurora); outline-offset:2px; }
 </style>
 </head>
 <body>
+<button type="button" id="langToggle" aria-label="Switch to English">EN</button>
 <div class="wrap">
-  <h1>极夜海雀 · 开发历程</h1>
-  <p class="sub">从一片雪地开始,一路加到南海北陆、鱼群、鲸鱼。历史版本网页。</p>
+  <h1 data-i18n="h1">极夜海雀 · 开发历程</h1>
+  <p class="sub" data-i18n="sub">从一片雪地开始,一路加到南海北陆、鱼群、鲸鱼。历史版本网页。</p>
 
   <div class="timeline">
     <div class="item">
       <div class="card">
         <div class="tag">v1</div>
-        <h2>初版 · 冰岛雪地场景</h2>
-        <p>极光、雪山、飘雪与昼夜切换;海雀在雪地上走动,点地面撒草料,点海雀让它翻个跟头, 水塘与鱼, 雪地里的水塘不结冰,鱼在里面游动;点鱼会吓得它跳上岸,变成海雀的食物,吃完水塘会自动补新鱼。</p>
-        <a class="open" href="v1.html">打开这一版 →</a>
+        <h2 data-i18n="v1.h">初版 · 冰岛雪地场景</h2>
+        <p data-i18n="v1.p">极光、雪山、飘雪与昼夜切换;海雀在雪地上走动,点地面撒草料,点海雀让它翻个跟头, 水塘与鱼, 雪地里的水塘不结冰,鱼在里面游动;点鱼会吓得它跳上岸,变成海雀的食物,吃完水塘会自动补新鱼。</p>
+        <a class="open" href="v1.html" data-i18n="open">打开这一版 →</a>
         <div class="filename"></div>
       </div>
     </div>
@@ -69,9 +80,9 @@
     <div class="item">
       <div class="card">
         <div class="tag">v2</div>
-        <h2>加入海洋与浮冰，鲸鱼登场</h2>
-        <p>冰面变为圆形，粗糙海洋建立，新增鲸鱼与极低浮冰。</p>
-        <a class="open" href="v2.html">打开这一版 →</a>
+        <h2 data-i18n="v2.h">加入海洋与浮冰，鲸鱼登场</h2>
+        <p data-i18n="v2.p">冰面变为圆形，粗糙海洋建立，新增鲸鱼与极低浮冰。</p>
+        <a class="open" href="v2.html" data-i18n="open">打开这一版 →</a>
         <div class="filename"></div>
       </div>
     </div>
@@ -79,9 +90,9 @@
     <div class="item">
       <div class="card">
         <div class="tag">v3</div>
-        <h2>大改版 · 修复地形渲染（南海北陆） / 点击失效</h2>
-        <p>修了一个背面剔除的底层 bug， 地形从"孤岛环海"改成"北边陆地、南边开阔海"，海岸线做成锯齿状。新增鲸鱼:偶尔浮出水面、点它喷水变小、投喂它会游过来吃掉变大。</p>
-        <a class="open" href="v3.html">打开这一版 →</a>
+        <h2 data-i18n="v3.h">大改版 · 修复地形渲染（南海北陆） / 点击失效</h2>
+        <p data-i18n="v3.p">修了一个背面剔除的底层 bug， 地形从"孤岛环海"改成"北边陆地、南边开阔海"，海岸线做成锯齿状。新增鲸鱼:偶尔浮出水面、点它喷水变小、投喂它会游过来吃掉变大。</p>
+        <a class="open" href="v3.html" data-i18n="open">打开这一版 →</a>
         <div class="filename"></div>
       </div>
     </div>
@@ -89,21 +100,19 @@
     <div class="item">
       <div class="card">
         <div class="tag">v4</div>
-        <h2>地图三倍扩大 + 山脉均匀分布+物理碰撞</h2>
-        <p>世界边界推远并用雾效藏起来,海岸碎冰稀疏化,山脉间距拉开不再拥挤。食物不能扔进山里,海雀走路会绕开山体。</p>
-        <a class="open" href="v4.html">打开这一版 →</a>
+        <h2 data-i18n="v4.h">地图三倍扩大 + 山脉均匀分布+物理碰撞</h2>
+        <p data-i18n="v4.p">世界边界推远并用雾效藏起来,海岸碎冰稀疏化,山脉间距拉开不再拥挤。食物不能扔进山里,海雀走路会绕开山体。</p>
+        <a class="open" href="v4.html" data-i18n="open">打开这一版 →</a>
         <div class="filename"></div>
       </div>
     </div>
 
-
-
     <div class="item">
       <div class="card">
         <div class="tag">v5</div>
-        <h2>鲸鱼放大 3 倍 + 找食范围</h2>
-        <p>鲸鱼模型整体放大 3 倍(下潜深度同步调整,避免露出水面);海雀和鲸鱼都加入了"找食范围"，离食物太远就不会再赶过来。</p>
-        <a class="open" href="v5.html">打开这一版 →</a>
+        <h2 data-i18n="v5.h">鲸鱼放大 3 倍 + 找食范围</h2>
+        <p data-i18n="v5.p">鲸鱼模型整体放大 3 倍(下潜深度同步调整,避免露出水面);海雀和鲸鱼都加入了"找食范围"，离食物太远就不会再赶过来。</p>
+        <a class="open" href="v5.html" data-i18n="open">打开这一版 →</a>
         <div class="filename"></div>
       </div>
     </div>
@@ -111,9 +120,9 @@
     <div class="item">
       <div class="card">
         <div class="tag">v6</div>
-        <h2>鲸鱼浮水更自然 + 满天极光 + 视角防穿地</h2>
-        <p>鲸鱼浮出水面时改成大半个身子沉在水下、只露出背部和背鳍(之前是整只飘在水面上),胸鳍、尾巴和身体摆动也更有生气;极光从原来一小段弧形扩展成整片天空环绕;镜头加了地面/海面下限,不会再被甩到地底下往上看;水塘改成不规则的自然形状;开场引导文案与可读性也做了微调。</p>
-        <a class="open" href="v6.html">打开这一版 →</a>
+        <h2 data-i18n="v6.h">鲸鱼浮水更自然 + 满天极光 + 视角防穿地</h2>
+        <p data-i18n="v6.p">鲸鱼浮出水面时改成大半个身子沉在水下、只露出背部和背鳍(之前是整只飘在水面上),胸鳍、尾巴和身体摆动也更有生气;极光从原来一小段弧形扩展成整片天空环绕;镜头加了地面/海面下限,不会再被甩到地底下往上看;水塘改成不规则的自然形状;开场引导文案与可读性也做了微调。</p>
+        <a class="open" href="v6.html" data-i18n="open">打开这一版 →</a>
         <div class="filename"></div>
       </div>
     </div>
@@ -121,9 +130,9 @@
     <div class="item">
       <div class="card">
         <div class="tag">v7</div>
-        <h2>鲸鱼跃出水面 + 带娃 / 极夜里海雀睡觉、流星</h2>
-        <p>鲸鱼会不定期跃出水面(breach)或用力拍打尾巴溅起水花;长到最大之后还会带上一只跟着游的小鲸鱼。极夜里海雀闲下来时会趴下睡觉,天亮或被戳一下才会醒;极光在夜里更明亮;夜空偶尔会划过一颗流星。</p>
-        <a class="open" href="v7.html">打开这一版 →</a>
+        <h2 data-i18n="v7.h">鲸鱼跃出水面 + 带娃 / 极夜里海雀睡觉、流星</h2>
+        <p data-i18n="v7.p">鲸鱼会不定期跃出水面(breach)或用力拍打尾巴溅起水花;长到最大之后还会带上一只跟着游的小鲸鱼。极夜里海雀闲下来时会趴下睡觉,天亮或被戳一下才会醒;极光在夜里更明亮;夜空偶尔会划过一颗流星。</p>
+        <a class="open" href="v7.html" data-i18n="open">打开这一版 →</a>
         <div class="filename"></div>
       </div>
     </div>
@@ -131,19 +140,29 @@
     <div class="item">
       <div class="card">
         <div class="tag">v8</div>
-        <h2>小鲸鱼独立生活 + 流星修复 + 海雀不再挤成一团</h2>
-        <p>淡绿色的小鲸鱼变成独立个体,会自己找食物、吃了会长大,但不会再生下一只;修复了流星只出现在正头顶、镜头根本看不到的问题;多只海雀同时抢食时会在食物周围散开站,不再叠在一起穿模。</p>
-        <a class="open" href="v8.html">打开这一版 →</a>
+        <h2 data-i18n="v8.h">小鲸鱼独立生活 + 流星修复 + 海雀不再挤成一团</h2>
+        <p data-i18n="v8.p">淡绿色的小鲸鱼变成独立个体,会自己找食物、吃了会长大,但不会再生下一只;修复了流星只出现在正头顶、镜头根本看不到的问题;多只海雀同时抢食时会在食物周围散开站,不再叠在一起穿模。</p>
+        <a class="open" href="v8.html" data-i18n="open">打开这一版 →</a>
+        <div class="filename"></div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="card">
+        <div class="tag">v9</div>
+        <h2 data-i18n="v9.h">休眠火山 + 绿色流星 + 海雀趴着睡</h2>
+        <p data-i18n="v9.p">冰原上多了一座大型休眠火山(暂不喷发),和其他山一样有碰撞:海雀走路会绕开,飞行时会自动抬高弧线越过山顶,食物也扔不进去。流星改成一道细细的绿色轨迹,燃尽时会闪一下。修复了海雀睡着后慢慢沉进雪里、醒来又突然冒出来的 bug,现在只是压低身子、低头趴在雪面上。</p>
+        <a class="open" href="v9.html" data-i18n="open">打开这一版 →</a>
         <div class="filename"></div>
       </div>
     </div>
 
     <div class="item current">
       <div class="card">
-        <div class="tag">v9 · 当前版本</div>
-        <h2>休眠火山 + 绿色流星 + 海雀趴着睡</h2>
-        <p>冰原上多了一座大型休眠火山(暂不喷发),和其他山一样有碰撞:海雀走路会绕开,飞行时会自动抬高弧线越过山顶,食物也扔不进去。流星改成一道细细的绿色轨迹,燃尽时会闪一下。修复了海雀睡着后慢慢沉进雪里、醒来又突然冒出来的 bug,现在只是压低身子、低头趴在雪面上。</p>
-        <a class="open" href="index.html">打开当前版本 →</a>
+        <div class="tag">v10 · <span data-i18n="current">当前版本</span></div>
+        <h2 data-i18n="v10.h">中英文切换 + 火山喷发</h2>
+        <p data-i18n="v10.p">网站支持中文 / English 切换,默认跟随浏览器语言,选择会被记住。火山会慢慢积蓄能量,蓄满后火山口冒白烟,这时点它就会喷发:熔岩弹飞向四周落成熔岩池,附近的海雀吓得飞走;熔岩逐渐冷却变黑、结霜消失,冰原恢复原样后火山重新开始蓄能,海雀也会慢慢走回来。</p>
+        <a class="open" href="index.html" data-i18n="openCurrent">打开当前版本 →</a>
         <div class="filename"></div>
       </div>
     </div>
@@ -151,5 +170,72 @@
 
   <footer>life-after-work · experimental</footer>
 </div>
+
+<script>
+(function () {
+  "use strict";
+  // Chinese stays in the markup (captured on load); English lives here.
+  var EN = {
+    docTitle: "Aurora Puffins · Version history",
+    h1: "Aurora Puffins · Dev log",
+    sub: "It started as a patch of snow, then grew a northern shore, a southern sea, fish and whales. Every past build is kept below.",
+    open: "Open this build →",
+    openCurrent: "Open the current build →",
+    current: "Current",
+    "v1.h": "First build · Icelandic snowfield",
+    "v1.p": "Aurora, snowy peaks, falling snow and a day/night switch. Puffins wander the snow; tap the ground to scatter food, tap a puffin for a backflip. The ponds never freeze and fish swim in them — tap a fish and it leaps ashore as a puffin snack, and the pond restocks itself.",
+    "v2.h": "Ocean, ice floes and the first whales",
+    "v2.p": "The ice became a round island, a rough ocean was added, plus whales and low drifting floes.",
+    "v3.h": "Big rework · terrain rendering fix (land north, sea south) / broken clicks",
+    "v3.p": "Fixed an underlying back-face culling bug. The layout went from \"island ringed by sea\" to \"land in the north, open sea to the south\" with a jagged coastline. Whales now surface now and then: tap one to make it spout and shrink, feed it and it swims over, eats and grows.",
+    "v4.h": "Map 3× larger + even mountain spacing + collisions",
+    "v4.p": "The world edge was pushed out and hidden in fog, coastal ice thinned out, and the mountains spread apart. Food can't be thrown into mountains, and puffins walk around them.",
+    "v5.h": "Whales 3× bigger + feeding range",
+    "v5.p": "Whale models tripled in size (dive depth adjusted so they don't poke out of the water). Puffins and whales now have a feeding range — if food lands too far away, they won't come for it.",
+    "v6.h": "Natural whale surfacing + sky-wide aurora + camera floor",
+    "v6.p": "Surfaced whales now sit mostly underwater with just the back and dorsal fin showing (they used to float on top of the sea), with livelier fins, tail and body sway. The aurora grew from a short arc into a band around the whole sky. The camera can no longer be flung underground to look up at nothing. Ponds got irregular, natural shapes, and the intro text and legibility were polished.",
+    "v7.h": "Breaching whales + calves / sleeping puffins and meteors",
+    "v7.p": "Whales now breach now and then or slap their tails with a splash, and a fully grown whale brings a calf along. In the polar night idle puffins lie down to sleep until daybreak or a poke; the aurora glows brighter at night, and the odd meteor streaks across the sky.",
+    "v8.h": "Independent calves + meteor fix + no more puffin pile-ups",
+    "v8.p": "The pale green calf became a whale of its own: it finds food and grows, but never brings another calf. Fixed meteors that only appeared straight overhead where the camera can't look. Puffins racing to the same snack now gather around it instead of stacking into one clipped blob.",
+    "v9.h": "Dormant volcano + green meteors + puffins rest on the snow",
+    "v9.p": "A large dormant volcano (no eruptions yet) now stands on the ice, with collisions like the other mountains: puffins walk around it, raise their flight arc to clear the summit, and food can't be thrown onto it. Meteors became a thin green streak that flares as it burns out. Fixed puffins slowly sinking into the snow while asleep and popping back up on waking — now they just hunker down and tuck their heads.",
+    "v10.h": "Chinese / English + volcanic eruptions",
+    "v10.p": "The site now switches between 中文 and English — it follows the browser language by default and remembers your choice. The volcano slowly builds pressure; once full, white smoke rises from the crater, and tapping it sets off an eruption: lava bombs splash molten pools around it and nearby puffins flee in panic. The lava cools, turns black, frosts over and melts back into the ice — then the volcano starts recharging and the puffins wander home."
+  };
+  var LANG_KEY = "aurora-puffins-lang";
+  var nodes = Array.prototype.slice.call(document.querySelectorAll("[data-i18n]"));
+  nodes.forEach(function (el) { el.setAttribute("data-zh", el.textContent); });
+  var zhTitle = document.title;
+  var btn = document.getElementById("langToggle");
+
+  var lang = (function () {
+    var saved = null;
+    try { saved = localStorage.getItem(LANG_KEY); } catch (e) {}
+    if (saved === "zh" || saved === "en") return saved;
+    var nav = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+    return /^zh/i.test(nav) ? "zh" : "en";
+  })();
+
+  function apply() {
+    var en = lang === "en";
+    document.documentElement.lang = en ? "en" : "zh-CN";
+    document.title = en ? EN.docTitle : zhTitle;
+    nodes.forEach(function (el) {
+      var key = el.getAttribute("data-i18n");
+      el.textContent = en && EN[key] ? EN[key] : el.getAttribute("data-zh");
+    });
+    btn.textContent = en ? "中" : "EN";
+    btn.setAttribute("aria-label", en ? "切换到中文" : "Switch to English");
+    btn.title = btn.getAttribute("aria-label");
+  }
+  btn.addEventListener("click", function () {
+    lang = lang === "zh" ? "en" : "zh";
+    try { localStorage.setItem(LANG_KEY, lang); } catch (e) {}
+    apply();
+  });
+  apply();
+})();
+</script>
 </body>
 </html>
