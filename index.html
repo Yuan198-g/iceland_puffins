@@ -310,6 +310,11 @@
   var PLAY_LAND_FAR_Z = 120;
   var PLAY_OCEAN_FAR_Z = -138;
 
+  // The meshes are rectangles; everything melts into the horizon/fog colour
+  // along a circle between these radii, so from high up the world edge reads
+  // as a soft round horizon instead of a hard square border.
+  var EDGE_FADE_START = 175, EDGE_FADE_END = 218;
+
   function coastlineZ(x) {
     return Math.sin(x * 0.12) * 3.2 + Math.sin(x * 0.05 + 1.3) * 2.4 + Math.cos(x * 0.3) * 0.8;
   }
@@ -730,6 +735,7 @@
   var oceanMat = new THREE.ShaderMaterial({
     uniforms: oceanUniforms,
     side: THREE.DoubleSide,
+    transparent: true, // only for the edge fade; the open sea itself stays fully opaque
     vertexShader: [
       "uniform float uTime;",
       "uniform float uWind;",
@@ -755,13 +761,16 @@
       "  float d = clamp((-vXZ.y) / 50.0, 0.0, 1.0);",
       "  vec3 col = mix(uColorShallow, uColorDeep, d);",
       "  col += vWave * 0.03;",
-      "  gl_FragColor = vec4(col * uDim, 1.0);",
+      "  float edgeF = smoothstep(" + EDGE_FADE_START.toFixed(1) + ", " + EDGE_FADE_END.toFixed(1) + ", length(vXZ));",
+      "  gl_FragColor = vec4(col * uDim, 1.0 - edgeF);",
       "}"
     ].join("\n")
   });
   var ocean = new THREE.Mesh(oceanGeo, oceanMat);
   ocean.position.y = -0.16;
   ocean.name = "ocean";
+  // drawn first among transparent things, so ponds/lava/aurora blend over it, not over the sky
+  ocean.renderOrder = -2;
   scene.add(ocean);
 
   function oceanSurfaceY(x, z, elapsed, windStrength) {
@@ -2452,6 +2461,34 @@
   // ===============================================================
   // 13. Animation loop
   // ===============================================================
+  // Same radial edge fade as the ocean, for the lit meshes that reach the edge
+  // ring (the snow sheet and the outermost mountains). It fades alpha rather
+  // than mixing to the fog colour, so the real sky shows through — a flat fog
+  // colour doesn't match the sky behind a high camera and reads as a pale slab.
+  function addEdgeFade(shader) {
+    shader.vertexShader = "varying vec3 vEdgeWorld;\n" + shader.vertexShader.replace(
+      "#include <project_vertex>",
+      "#include <project_vertex>\n  vEdgeWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;"
+    );
+    shader.fragmentShader = "varying vec3 vEdgeWorld;\n" + shader.fragmentShader.replace(
+      "#include <fog_fragment>",
+      "#include <fog_fragment>\n  gl_FragColor.a *= 1.0 - smoothstep(" +
+        EDGE_FADE_START.toFixed(1) + ", " + EDGE_FADE_END.toFixed(1) + ", length(vEdgeWorld.xz));"
+    );
+  }
+  scene.updateMatrixWorld(true);
+  var edgeSphere = new THREE.Sphere();
+  scene.traverse(function (obj) {
+    if (!obj.isMesh || !obj.material || !obj.material.isMeshStandardMaterial) return;
+    if (!obj.geometry.boundingSphere) obj.geometry.computeBoundingSphere();
+    edgeSphere.copy(obj.geometry.boundingSphere).applyMatrix4(obj.matrixWorld);
+    if (Math.hypot(edgeSphere.center.x, edgeSphere.center.z) + edgeSphere.radius < EDGE_FADE_START) return;
+    obj.material.onBeforeCompile = addEdgeFade;
+    obj.material.transparent = true;
+    // draw before ponds/lava/aurora so their blending lands on the snow, not the sky
+    obj.renderOrder = obj === ground ? -2 : -1;
+  });
+
   var clock = new THREE.Clock();
   var frameCount = 0;
 
