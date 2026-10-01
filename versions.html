@@ -48,6 +48,9 @@
   .card a.open:hover{ filter:brightness(1.08); }
   .filename{ font-size:11.5px; color:var(--ink-soft); opacity:.6; margin-top:8px; }
   footer{ text-align:center; color:var(--ink-soft); font-size:12px; margin-top:48px; opacity:.6; }
+  .section-title{
+    font-family:'Space Grotesk', 'Noto Sans SC', sans-serif; font-size:22px; margin:56px 0 6px;
+  }
 
   #langToggle{
     position:fixed; top:18px; right:18px; z-index:5;
@@ -157,13 +160,28 @@
       </div>
     </div>
 
-    <div class="item current">
+    <div class="item">
       <div class="card">
-        <div class="tag">v10 · <span data-i18n="current">当前版本</span></div>
+        <div class="tag">v10</div>
         <h2 data-i18n="v10.h">中英文切换 + 火山喷发</h2>
         <p data-i18n="v10.p">网站支持中文 / English 切换,默认跟随浏览器语言,选择会被记住。火山会慢慢积蓄能量,蓄满后火山口冒白烟,这时点它就会喷发:熔岩弹飞向四周落成熔岩池,附近的海雀吓得飞走;熔岩逐渐冷却变黑、结霜消失,冰原恢复原样后火山重新开始蓄能,海雀也会慢慢走回来。地图边缘不再是生硬的方形边界,海面和雪地会渐渐淡入天空。</p>
-        <a class="open" href="index.html" data-i18n="openCurrent">打开当前版本 →</a>
+        <a class="open" href="v10.html" data-i18n="open">打开这一版 →</a>
         <div class="filename"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title" data-i18n="editionsTitle">养成版本 · Editions</h2>
+  <p class="sub" data-i18n="editionsSub">Version 是完全没有目标的休闲观赏;Edition 在它之上加入可选的养成玩法——不想养的时候,把卡片收起来,一切照旧。</p>
+
+  <div class="timeline">
+    <div class="item current">
+      <div class="card">
+        <div class="tag">E1 · <span data-i18n="current">当前版本</span></div>
+        <h2 data-i18n="e1.h">认养与陪伴</h2>
+        <p data-i18n="e1.p">点一只海雀,它照样翻个跟头,同时打开它的卡片:名字、性格(活泼 / 悠闲 / 胆小)、正在做什么、亲密度。最多认养 3 只,可以起名、随时改名。喂它吃东西、抚摸它会慢慢变熟:初识时它会看向你,熟悉后会开心地拍翅膀,亲近后会蹦跳着回应,也会优先跑来吃你投的食物。亲密度有 30 秒冷却和每天 20 点上限,离开不会有任何惩罚。右上角「我的海雀」能找到它们,「定位」把镜头移过去,「跟随」让镜头陪着它走——拖动或缩放视角就会退出跟随。下次打开,它们还在。</p>
+        <a class="open" href="index.html" data-i18n="openCurrent">打开当前版本 →</a>
+        <div class="filename">E1.html</div>
       </div>
     </div>
   </div>
@@ -200,6 +218,10 @@
     "v8.p": "The pale green calf became a whale of its own: it finds food and grows, but never brings another calf. Fixed meteors that only appeared straight overhead where the camera can't look. Puffins racing to the same snack now gather around it instead of stacking into one clipped blob.",
     "v9.h": "Dormant volcano + green meteors + puffins rest on the snow",
     "v9.p": "A large dormant volcano (no eruptions yet) now stands on the ice, with collisions like the other mountains: puffins walk around it, raise their flight arc to clear the summit, and food can't be thrown onto it. Meteors became a thin green streak that flares as it burns out. Fixed puffins slowly sinking into the snow while asleep and popping back up on waking — now they just hunker down and tuck their heads.",
+    editionsTitle: "Editions",
+    editionsSub: "Versions are the goal-free, just-watch builds. Editions add optional care play on top — fold the card away when you don't feel like it and everything is exactly as before.",
+    "e1.h": "Adoption & companionship",
+    "e1.p": "Tap a puffin: it still does its backflip, and its card opens with its name, personality (lively / easygoing / timid), what it's doing and its affinity. Adopt up to 3, name them and rename them any time. Feeding and petting slowly bring you closer: at first it just looks up at you, once familiar it flaps its wings happily, and once close it hops around when petted and comes first for food you drop. Affinity has a 30-second cooldown and a 20-point daily cap, and there is never any penalty for being away. \"My puffins\" at the top right finds them, \"Find\" glides the camera over, and \"Follow\" keeps it with them until you drag or zoom. Next time you open the page, they are still there.",
     "v10.h": "Chinese / English + volcanic eruptions",
     "v10.p": "The site now switches between 中文 and English — it follows the browser language by default and remembers your choice. The volcano slowly builds pressure; once full, white smoke rises from the crater, and tapping it sets off an eruption: lava bombs splash molten pools around it and nearby puffins flee in panic. The lava cools, turns black, frosts over and melts back into the ice — then the volcano starts recharging and the puffins wander home. The map no longer ends in a hard square edge: the sea and snow now fade softly into the sky."
   };
