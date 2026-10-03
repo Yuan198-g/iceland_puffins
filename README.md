@@ -27,7 +27,7 @@
 
 Version 是完全没有目标的休闲观赏;**Edition** 在它之上加入可选的养成玩法。不想养的时候把卡片关掉,一切照旧。
 
-**E1 · 认养与陪伴**(当前版本,快照 [E1.html](E1.html))
+**E1 · 认养与陪伴**(快照 [E1.html](E1.html))
 
 - **认养**:在海雀卡片上点「认养」,可以起名,也可以用默认名字,名字为 1–12 个字符。最多认养 3 只,之后可以随时「改名」
 - **性格**:每只海雀有固定的性格。活泼的更好动,悠闲的爱休息、走得慢,胆小的容易受惊,熟悉你之后会慢慢放松
@@ -36,6 +36,17 @@ Version 是完全没有目标的休闲观赏;**Edition** 在它之上加入可�
 - **我的海雀**:右上角入口,列出已认养的海雀,点一下就把镜头移过去
 - **定位 / 跟随**:「定位」把镜头平滑移到它身边;「跟随」让镜头一直跟着它,拖动、平移或缩放视角时自动退出跟随
 - **存档**:名字、性格、认养和亲密度保存在浏览器本地(localStorage),下次打开还在;存档损坏时会自动重新开始,不会影响游戏启动
+
+**E2 · 幼鸟成长与第一次学飞**(当前版本,快照 [E2.html](E2.html))
+
+- **领养幼鸟**:右上角「领养幼鸟」,起个名字(规则同 E1),一只灰色小绒球会出现在安全的雪地上,镜头自动移过去。幼鸟有专属位置,不占 E1 的 3 只名额(名额满了也能领养);每个存档只能领养这一只,长大后仍是同一只
+- **三个阶段**:成长值 0–100。幼鸟(0–29)圆滚滚、迈小碎步、只会扑腾;少年(30–69)个头变大、黑白羽毛慢慢长出来,会短距离低飞;成年(70–100)和其他海雀一样生活,名字、性格、亲密度和成长记录都保留
+- **怎么长大**:吃到你投的食物 +3(60 秒冷却),完整做完一次练习 +4(120 秒冷却)。自己觅食不算,冷却中会提示但不加成长。不会倒退,没有离线惩罚,也没有离线结算,认真陪几次(每次 5–10 分钟)就能长大
+- **练习**:幼鸟「练习扑腾」(原地扑腾 + 小跳);少年「陪它学飞」(助跑、扑翅、低飞、落地),练得越多飞得越远越稳;成年后显示「已完成成长」。练习只走安全路线,避开海面、水塘、山和火山,找不到路线时只提示、不消耗机会;被火山打断的练习不给奖励
+- **安全**:幼鸟和少年只在自己能力范围内活动;火山喷发时会沿安全的陆地路线小跑逃开,不会长距离飞行。睡觉、躲避等必要行为优先于练习和抚摸
+- **成长记录**:卡片底部可折叠的小记录,五个时刻各记一次——来到冰原、第一次吃到你投的食物、长成少年、第一次成功飞行、长成成年
+- **成年海雀的陪伴**:偶尔有一两只成年海雀走到幼鸟附近停下来看着它,不抢食、不扎堆,也没有配对或繁殖
+- **存档**:存档升级到 v2,自动迁移 E1 的认养数据;幼鸟的身份、成长值、练习次数、冷却和成长记录都会保存,刷新后接着来
 
 ### 开发历程
 
@@ -77,7 +88,7 @@ A quiet, ever-running ecosystem simulation of the Icelandic polar north. No leve
 
 Versions are the goal-free, just-watch builds. **Editions** add optional care play on top of them — close the card when you don't feel like it and everything is exactly as before.
 
-**E1 · Adoption & companionship** (current build, snapshot [E1.html](E1.html))
+**E1 · Adoption & companionship** (snapshot [E1.html](E1.html))
 
 - **Adopt**: press "Adopt" on a puffin's card and give it a name (1–12 characters) or keep the default. Up to 3 puffins; "Rename" any time afterwards
 - **Personality**: every puffin has a fixed one. Lively ones are always on the move, easygoing ones rest longer and walk slower, and timid ones startle easily but relax as they get to know you
@@ -86,6 +97,17 @@ Versions are the goal-free, just-watch builds. **Editions** add optional care pl
 - **My puffins**: the top-right entry lists your adopted puffins; tap one to glide the camera over
 - **Find / Follow**: "Find" moves the camera smoothly to it; "Follow" keeps the camera with it, and any drag, pan or zoom hands control back to you
 - **Saving**: names, personalities, adoption and affinity are kept in the browser (localStorage), so they're there next time; an unreadable save is reset automatically and never stops the game from starting
+
+**E2 · Growing up & first flight** (current build, snapshot [E2.html](E2.html))
+
+- **Adopt a chick**: "Adopt a chick" at the top right. Name it (same rules as E1) and a grey ball of fluff appears on safe snow while the camera glides over. The chick has a slot of its own and doesn't use any of E1's 3 adoption slots (it works even when they're full). Each save gets just this one chick, and it stays the same bird as it grows up
+- **Three stages**: growth runs 0–100. Chick (0–29): round, tiny steps, can only flap. Juvenile (30–69): bigger, black-and-white feathers coming in, short low flights. Adult (70–100): lives like every other puffin and keeps its name, personality, affinity and journal
+- **How it grows**: +3 when it eats food you dropped (60-second cooldown), +4 for each practice it finishes (120-second cooldown). Finding food on its own doesn't count, and during a cooldown you get a note but no growth. Nothing goes backwards, with no offline penalties and no offline catch-up — a few proper visits (5–10 minutes each) are enough to raise it
+- **Practice**: the chick does "Practise flapping" (flaps and little hops); the juvenile does "Practise flying" (run-up, flapping, a low hop of a flight, landing), going further and steadier the more it practises; adults show "Fully grown". Practice only uses safe lines clear of the sea, ponds, mountains and the volcano. If there's no safe line you just get a hint and lose nothing, and practice cut short by the volcano gives no reward
+- **Safety**: chicks and juveniles only do what they're able to. When the volcano erupts they scurry away along a safe route over land instead of making a long flight. Sleeping and getting out of danger always come before practice and petting
+- **Growth journal**: a small foldable log at the bottom of the card with five moments, each recorded once — arriving on the ice, first snack from you, becoming a juvenile, first successful flight, growing up
+- **Grown-up company**: now and then one or two adults stroll over, stop nearby and watch the chick — no food stealing, no crowding, and no pairing or breeding
+- **Saving**: the save format moves to v2 and migrates E1's adoption data automatically. The chick's identity, growth, practice counts, cooldowns and journal are all kept, so a refresh picks up where you left off
 
 ### Dev log
 

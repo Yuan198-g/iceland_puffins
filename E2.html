@@ -228,7 +228,7 @@
   .pc-rows{ margin:12px 0 8px; }
   .pc-rows > div{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:5px 0; font-size:12.5px; }
   .pc-rows dt{ color:var(--ink-soft); white-space:nowrap; }
-  #pcAffText{ white-space:nowrap; }
+  #pcAffText, #pcGrowthText{ white-space:nowrap; }
   .pc-rows dd{ margin:0; text-align:right; display:flex; align-items:center; gap:8px; }
   .pc-bar{ width:70px; height:5px; border-radius:3px; background:rgba(234,242,246,.14); overflow:hidden; }
   .pc-bar i{ display:block; height:100%; width:0; background:var(--aurora); transition:width .4s ease; }
@@ -245,19 +245,22 @@
   .pc-err{ font-size:11.5px; color:#FCA5A5; min-height:1em; margin:6px 0 0; }
 
   @media (max-width: 640px){
+    #title-block{ top:18px; left:16px; }
+    #title-block .eyebrow{ font-size:17px; }
     #title-block .sub{ display:none; }
     #hint{ max-width:calc(100vw - 32px); font-size:10.5px; gap:10px; left:16px; bottom:84px; }
     #panel{ padding:10px 12px; gap:12px; }
     #windRange{ width:70px; }
-    #topRight{ top:16px; right:16px; gap:6px; }
+    /* two pills don't fit beside the title on a phone: title row, then the pills */
+    #topRight{ top:50px; right:12px; gap:6px; }
     .top-pill{ padding:8px 11px; }
-    #chickBtn .lbl{ display:none; } /* icon + stage chip is enough on a phone */
-    #companionList{ top:58px; right:12px; left:12px; width:auto; }
-    #chickPanel{ top:58px; left:12px; right:12px; width:auto; max-height:calc(100vh - 230px); }
-    #puffinCard{ top:58px; left:12px; right:12px; width:auto; max-height:calc(100vh - 230px); padding:12px 14px 14px; }
+    #chickBtn.owned .lbl{ display:none; } /* once it has a chick, icon + stage chip is enough on a phone */
+    #companionList{ top:92px; right:12px; left:12px; width:auto; }
+    #chickPanel{ top:92px; left:12px; right:12px; width:auto; max-height:calc(100vh - 264px); }
+    #puffinCard{ top:92px; left:12px; right:12px; width:auto; max-height:calc(100vh - 264px); padding:12px 14px 14px; }
     .cl-item{ padding:13px 10px; }
     #puffinCard .pill-btn{ padding:11px 15px; font-size:13px; }
-    #toast{ top:62px; max-width:calc(100vw - 32px); text-align:center; }
+    #toast{ top:96px; max-width:calc(100vw - 32px); text-align:center; }
   }
 </style>
 </head>
@@ -462,7 +465,7 @@
       "chick.slot": "已领养 · 幼鸟专属名额",
       "growth.section": "成长", "growth.stageLabel": "成长阶段", "growth.progress": "成长值",
       "growth.stage.0": "幼鸟", "growth.stage.1": "少年", "growth.stage.2": "成年",
-      "growth.text": "{g}/100", "growth.next": "{g}/100 · 距「{stage}」还差 {n}",
+      "growth.text": "{g}/100", "growth.next": "{g}/100 · 差 {n} 到{stage}",
       "growth.feedReady": "喂食可成长", "growth.feedCd": "喂食成长 {s} 秒后",
       "growth.practiceReady": "练习可成长", "growth.practiceCd": "练习成长 {s} 秒后",
       "growth.max": "成长值已满", "growth.grownNote": "已经长成成年海雀,不再需要成长练习。",
@@ -3880,6 +3883,7 @@
   function refreshChickPanel() {
     setText(ck.BtnText, t(chickRec ? "chick.button.mine" : "chick.button.adopt"));
     ck.BtnStage.hidden = !chickRec;
+    chickBtn.classList.toggle("owned", !!chickRec);
     ck.AdoptView.hidden = !!chickRec;
     ck.OwnedView.hidden = !chickRec;
     if (!chickRec) return;
