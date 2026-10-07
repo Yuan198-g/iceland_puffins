@@ -21,7 +21,7 @@
 - **点海面** 投喂(它会游过来吃掉、变大)
 - **点火山** 火山会慢慢蓄能,冒白烟时点它就会喷发
 - **拖动** 旋转视角 / **右键或双指** 平移 / **滚轮** 缩放
-- 右下角面板可调节风力、切换白昼与极夜(默认跟随你的本地时间)、切换中文 / English
+- 右下角面板可调节风力、切换白昼与极夜(默认跟随你的本地时间)、开关声音、切换中文 / English
 
 ### 养成版本(Edition)
 
@@ -48,7 +48,7 @@ Version 是完全没有目标的休闲观赏;**Edition** 在它之上加入可�
 - **成年海雀的陪伴**:偶尔有一两只成年海雀走到幼鸟附近停下来看着它,不抢食、不扎堆,也没有配对或繁殖
 - **存档**:存档升级到 v2,自动迁移 E1 的认养数据;幼鸟的身份、成长值、练习次数、冷却和成长记录都会保存,刷新后接着来
 
-**E3 · 真实天空与稀客**(当前版本,快照 [E3.html](E3.html))
+**E3 · 真实天空与稀客**(快照 [E3.html](E3.html))
 
 - **跟随本地时间**:昼夜跟着你设备的本地时间走——07:00–19:00 是白昼,其余时间是极夜和极光。开着页面时到了傍晚或清晨,天色会在约 20 秒里慢慢变化
 - **手动切换**:右下角的开关照样能点。点一下手动切换(时钟小图标消失),再点一下回到本地时间;本地时间自己走到和你选的一样时,也会悄悄回到自动。手动选择不保存,每次打开都从本地时间开始
@@ -60,6 +60,18 @@ Version 是完全没有目标的休闲观赏;**Edition** 在它之上加入可�
   - 虎鲸群:3–5 头(高背鳍的雄鲸、雌鲸,有时带一头小鲸)沿着海岸远处一起换气游过,偶尔有一头跃出水面
   - 它们不会伤害海雀,也不抢食。附近醒着的海雀会转头盯着看,狐狸走得太近时海雀会沿安全路线走开几步。点一下稀客,它会注意到你(狐狸停下歪头,雪鸮转头眨眼,虎鲸喷一口气)。火山喷发时附近的稀客会先离开,喷发中也不会有新的稀客来
 - **预览**:不想等的话,可以在网址后面加参数:`?date=2026-08-12&time=23:00` 看英仙座流星雨,`?date=2026-10-26&time=22:00` 看满月,`?visitor=fox`(或 `owl`、`orca`)让稀客几秒后就来。参数只影响天空和稀客,不会改动存档、冷却或每日上限
+
+**E4 · 观察手记与声音**(当前版本,快照 [E4.html](E4.html))
+
+- **观察手记**:左上角「观察手记」,北极狐、雪鸮、虎鲸各一页。稀客在镜头里做出某个样子时会记下来,每种 4 个:北极狐的嗅闻、扑鼠、刨雪藏食、蜷成一团打盹;雪鸮的无声滑翔、大转头、抖松羽毛、眯眼打盹;虎鲸的换气、跃身击浪、拍尾、浮窥。每条配一句真实的小知识,没看到的只显示「？？？」,不显示进度数字
+- **安静观察**:稀客停下来时把镜头靠近,不去点它,它身边会亮起一圈小光环,大约 9 秒(虎鲸约 7 秒)填满,然后会做出平时看不到的样子——狐狸蜷成一团打盹、雪鸮眯眼打盹、离你最近的虎鲸竖起头浮窥。点一下它会注意到你,但光环会清零;一次来访里点到第三下,或在它身边撒食物,它就会提前离开
+- **认得出的老朋友**:北极狐有「缺耳」「白尾尖」「雪团」,雪鸮有「白先生」(雄鸟,几乎纯白)和「斑斑」(雌鸟,满身横斑),虎鲸有「缺口群」和「弯鳍群」(靠雄鲸的背鳍认,真实的研究者也是这样认虎鲸的)。手记里可以给它们起名字(1–12 个字符),再来时会提示「又来了 · 第 n 次来访」
+- **它们的偏好**:雪鸮多在黄昏和夜里来,狐狸多在清晨,虎鲸在没有风的时候更常来,风大时很少来。手记会记下每次在什么时间、什么风力下遇见它
+- **痕迹**:狐狸在雪地上留下一串慢慢被雪填平的脚印;雪鸮来之前先传来叫声,飞走后留下一根羽毛;虎鲸离得远时先看到高高的水雾
+- **更常来**:第一位最快 1–3 分钟就来,之后大约每 4–8 分钟一位,仍然一次只来一位、不会伤害海雀
+- **周末流星雨**:每个周五、六、日晚上(按入夜那天算,周日夜延续到周一早上)流星约是平时的 4 倍,同一个周末辐射点固定、每周换一个方向;英仙座、双子座极大那一夜仍是 6 倍并提示名字
+- **声音**:海浪(离海越近、风越大越响)、风、火山的低鸣和喷发、鲸鱼的歌声和喷水、虎鲸的叫声和换气、雪鸮的叫声、狐狸扑雪、湖里的鱼跳水,全部用 Web Audio 实时合成,没有音频文件;离得越远越轻,左右声道跟着位置走。右下角的喇叭按钮可以静音,选择会被记住;浏览器要求先点一下或按一下键,声音才会开始
+- **存档**:手记单独存在浏览器本地,不影响海雀的存档;损坏时会自动重新开始并保留一份备份。没有任务、倒计时或惩罚,不理稀客一切照旧
 
 ### 开发历程
 
@@ -95,7 +107,7 @@ A quiet, ever-running ecosystem simulation of the Icelandic polar north. No leve
 - **Tap the sea** to feed the whales (they swim over, eat and grow)
 - **Tap the volcano** — it slowly builds pressure, and once white smoke rises from the crater a tap sets it erupting
 - **Drag** to rotate / **right-drag or two fingers** to pan / **scroll** to zoom
-- The bottom-right panel adjusts the wind, switches between day and polar night (by default it follows your local time), and toggles 中文 / English
+- The bottom-right panel adjusts the wind, switches between day and polar night (by default it follows your local time), turns sound on or off, and toggles 中文 / English
 
 ### Editions
 
@@ -122,7 +134,7 @@ Versions are the goal-free, just-watch builds. **Editions** add optional care pl
 - **Grown-up company**: now and then one or two adults stroll over, stop nearby and watch the chick — no food stealing, no crowding, and no pairing or breeding
 - **Saving**: the save format moves to v2 and migrates E1's adoption data automatically. The chick's identity, growth, practice counts, cooldowns and journal are all kept, so a refresh picks up where you left off
 
-**E3 · The real sky & rare visitors** (current build, snapshot [E3.html](E3.html))
+**E3 · The real sky & rare visitors** (snapshot [E3.html](E3.html))
 
 - **Local time**: day and night follow your device's local time — 07:00–19:00 is daytime, the rest is polar night under the aurora. If the page is open at dusk or dawn, the sky changes slowly over about 20 seconds
 - **Switching by hand**: the switch at the bottom right still works. One tap switches by hand (the little clock icon disappears); a second tap goes back to local time, and so does the clock reaching the state you picked. A manual choice isn't saved, so every visit starts on local time
@@ -134,6 +146,18 @@ Versions are the goal-free, just-watch builds. **Editions** add optional care pl
   - A pod of 3–5 orcas (a tall-finned male, females, sometimes a calf) passes along the coast far out at sea, surfacing together, and now and then one leaps clear of the water
   - They never harm the puffins or take their food. Awake puffins nearby turn to watch, and step a few paces away along a safe route if the fox comes too close. Tap a visitor and it notices you (the fox stops and tilts its head, the owl swivels round and blinks, an orca blows a spout). Visitors near the volcano leave when it erupts, and none arrive mid-eruption
 - **Preview**: don't feel like waiting? Add parameters to the URL: `?date=2026-08-12&time=23:00` for the Perseids, `?date=2026-10-26&time=22:00` for a full moon, `?visitor=fox` (or `owl`, `orca`) to have a visitor arrive within seconds. They only change the sky and the visitors — never the save, cooldowns or daily caps
+
+**E4 · Field notes & sound** (current build, snapshot [E4.html](E4.html))
+
+- **Field notes**: "Field notes" at the top left, with a page each for the arctic fox, the snowy owl and the orcas. When a visitor does something on screen it's written down — four things per kind: the fox sniffing, pouncing on a mouse, caching food and curling up to doze; the owl's silent glide, head swivel, fluffing up and dozing; the orcas breathing, breaching, tail-slapping and spyhopping. Each comes with a short real-life fact; anything not yet seen shows as "???", and there's no progress count
+- **Quiet watching**: when a visitor settles, bring the camera close and leave it be, and a small ring fills around it in about 9 seconds (orcas about 7). Then it shows you something it doesn't otherwise do — the fox curls up to doze, the owl squints and dozes, the nearest orca spyhops. A tap makes it notice you but empties the ring; a third tap in one visit, or food dropped right beside it, and it leaves early
+- **Regulars**: the foxes Notch-ear, White-tip and Snowball, the owls Mr. White (a male, almost pure white) and Freckles (a barred female), and the Notch pod and Bent-fin pod of orcas (known by the male's dorsal fin, just as real researchers identify orcas). You can name them in the notes (1–12 characters), and when they come back you're told "is back — visit #n"
+- **Favourite times**: owls come more at dusk and at night, foxes in the early morning, orcas when the wind has dropped (and rarely in a gale). The notes keep the time of day and the wind for every meeting
+- **Traces**: the fox leaves a line of prints that slowly fill back in with snow; the owl is heard before it's seen and leaves a feather where it sat; orcas far out show first as tall plumes of spray
+- **More often**: the first visitor can come within 1–3 minutes, then roughly every 4–8 minutes — still one at a time, and still never harming the puffins
+- **Weekend meteor showers**: every Friday, Saturday and Sunday night (counted from the evening, so Sunday night runs into Monday morning) has about 4× the usual shooting stars, with one radiant per weekend that moves from week to week; the Perseid and Geminid peak nights stay at 6× and keep their names
+- **Sound**: the sea (louder near the water and in the wind), the wind, the volcano's rumble and eruption, whale song and spouts, orca calls and blows, the owl's hoot, the fox's snow dive and the pond fish's plip — all synthesised live with Web Audio, no audio files. Sounds get quieter with distance and pan with position. The speaker button at the bottom right mutes it and remembers your choice; browsers need a first tap or key press before any sound can start
+- **Saving**: the notes live in their own local save, separate from the puffins'; an unreadable one is reset with a backup kept. No tasks, timers or penalties — ignore the visitors and everything is just as before
 
 ### Dev log
 
