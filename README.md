@@ -21,7 +21,7 @@
 - **点海面** 投喂(它会游过来吃掉、变大)
 - **点火山** 火山会慢慢蓄能,冒白烟时点它就会喷发
 - **拖动** 旋转视角 / **右键或双指** 平移 / **滚轮** 缩放
-- 右下角面板可调节风力、切换白昼与极夜、切换中文 / English
+- 右下角面板可调节风力、切换白昼与极夜(默认跟随你的本地时间)、切换中文 / English
 
 ### 养成版本(Edition)
 
@@ -37,7 +37,7 @@ Version 是完全没有目标的休闲观赏;**Edition** 在它之上加入可�
 - **定位 / 跟随**:「定位」把镜头平滑移到它身边;「跟随」让镜头一直跟着它,拖动、平移或缩放视角时自动退出跟随
 - **存档**:名字、性格、认养和亲密度保存在浏览器本地(localStorage),下次打开还在;存档损坏时会自动重新开始,不会影响游戏启动
 
-**E2 · 幼鸟成长与第一次学飞**(当前版本,快照 [E2.html](E2.html))
+**E2 · 幼鸟成长与第一次学飞**(快照 [E2.html](E2.html))
 
 - **领养幼鸟**:右上角「领养幼鸟」,起个名字(规则同 E1),一只灰色小绒球会出现在安全的雪地上,镜头自动移过去。幼鸟有专属位置,不占 E1 的 3 只名额(名额满了也能领养);每个存档只能领养这一只,长大后仍是同一只
 - **三个阶段**:成长值 0–100。幼鸟(0–29)圆滚滚、迈小碎步、只会扑腾;少年(30–69)个头变大、黑白羽毛慢慢长出来,会短距离低飞;成年(70–100)和其他海雀一样生活,名字、性格、亲密度和成长记录都保留
@@ -47,6 +47,19 @@ Version 是完全没有目标的休闲观赏;**Edition** 在它之上加入可�
 - **成长记录**:卡片底部可折叠的小记录,五个时刻各记一次——来到冰原、第一次吃到你投的食物、长成少年、第一次成功飞行、长成成年
 - **成年海雀的陪伴**:偶尔有一两只成年海雀走到幼鸟附近停下来看着它,不抢食、不扎堆,也没有配对或繁殖
 - **存档**:存档升级到 v2,自动迁移 E1 的认养数据;幼鸟的身份、成长值、练习次数、冷却和成长记录都会保存,刷新后接着来
+
+**E3 · 真实天空与稀客**(当前版本,快照 [E3.html](E3.html))
+
+- **跟随本地时间**:昼夜跟着你设备的本地时间走——07:00–19:00 是白昼,其余时间是极夜和极光。开着页面时到了傍晚或清晨,天色会在约 20 秒里慢慢变化
+- **手动切换**:右下角的开关照样能点。点一下手动切换(时钟小图标消失),再点一下回到本地时间;本地时间自己走到和你选的一样时,也会悄悄回到自动。手动选择不保存,每次打开都从本地时间开始
+- **真实月相**:夜空里的月亮是今晚真实的月相(误差约一小时内),从月牙、上弦、盈凸到满月;满月的夜里雪地更亮,暗星会被月光盖住,新月前后则看不到月亮。月亮总挂在东南方低空、镜头抬起就能看见,位置不是真实的
+- **流星雨**:英仙座(8 月 12 日夜)和双子座(12 月 13 日夜)极大那一夜,流星约是平时的 6 倍,前后两夜也会多一些;流星雨的流星都从同一个辐射点四散划过,而且大多出现在镜头正对的那片天空。入夜时会提示一句
+- **稀客**:页面开着时,大约每 8–16 分钟(第一位最早 3 分钟后)可能来一位,一次只来一位,同一种不会连着来:
+  - 北极狐(多为冰岛常见的深色「蓝狐」,也有白狐):小跑过来,东张西望、低头嗅闻,也许一头扎进雪里扑鼠,坐一会儿再从另一边离开
+  - 雪鸮:从高处滑翔下来,落在石头或雪地上,慢慢转头、眨眼、抖抖羽毛,二三十秒后飞走
+  - 虎鲸群:3–5 头(高背鳍的雄鲸、雌鲸,有时带一头小鲸)沿着海岸远处一起换气游过,偶尔有一头跃出水面
+  - 它们不会伤害海雀,也不抢食。附近醒着的海雀会转头盯着看,狐狸走得太近时海雀会沿安全路线走开几步。点一下稀客,它会注意到你(狐狸停下歪头,雪鸮转头眨眼,虎鲸喷一口气)。火山喷发时附近的稀客会先离开,喷发中也不会有新的稀客来
+- **预览**:不想等的话,可以在网址后面加参数:`?date=2026-08-12&time=23:00` 看英仙座流星雨,`?date=2026-10-26&time=22:00` 看满月,`?visitor=fox`(或 `owl`、`orca`)让稀客几秒后就来。参数只影响天空和稀客,不会改动存档、冷却或每日上限
 
 ### 开发历程
 
@@ -82,7 +95,7 @@ A quiet, ever-running ecosystem simulation of the Icelandic polar north. No leve
 - **Tap the sea** to feed the whales (they swim over, eat and grow)
 - **Tap the volcano** — it slowly builds pressure, and once white smoke rises from the crater a tap sets it erupting
 - **Drag** to rotate / **right-drag or two fingers** to pan / **scroll** to zoom
-- The bottom-right panel adjusts the wind, switches between day and polar night, and toggles 中文 / English
+- The bottom-right panel adjusts the wind, switches between day and polar night (by default it follows your local time), and toggles 中文 / English
 
 ### Editions
 
@@ -98,7 +111,7 @@ Versions are the goal-free, just-watch builds. **Editions** add optional care pl
 - **Find / Follow**: "Find" moves the camera smoothly to it; "Follow" keeps the camera with it, and any drag, pan or zoom hands control back to you
 - **Saving**: names, personalities, adoption and affinity are kept in the browser (localStorage), so they're there next time; an unreadable save is reset automatically and never stops the game from starting
 
-**E2 · Growing up & first flight** (current build, snapshot [E2.html](E2.html))
+**E2 · Growing up & first flight** (snapshot [E2.html](E2.html))
 
 - **Adopt a chick**: "Adopt a chick" at the top right. Name it (same rules as E1) and a grey ball of fluff appears on safe snow while the camera glides over. The chick has a slot of its own and doesn't use any of E1's 3 adoption slots (it works even when they're full). Each save gets just this one chick, and it stays the same bird as it grows up
 - **Three stages**: growth runs 0–100. Chick (0–29): round, tiny steps, can only flap. Juvenile (30–69): bigger, black-and-white feathers coming in, short low flights. Adult (70–100): lives like every other puffin and keeps its name, personality, affinity and journal
@@ -108,6 +121,19 @@ Versions are the goal-free, just-watch builds. **Editions** add optional care pl
 - **Growth journal**: a small foldable log at the bottom of the card with five moments, each recorded once — arriving on the ice, first snack from you, becoming a juvenile, first successful flight, growing up
 - **Grown-up company**: now and then one or two adults stroll over, stop nearby and watch the chick — no food stealing, no crowding, and no pairing or breeding
 - **Saving**: the save format moves to v2 and migrates E1's adoption data automatically. The chick's identity, growth, practice counts, cooldowns and journal are all kept, so a refresh picks up where you left off
+
+**E3 · The real sky & rare visitors** (current build, snapshot [E3.html](E3.html))
+
+- **Local time**: day and night follow your device's local time — 07:00–19:00 is daytime, the rest is polar night under the aurora. If the page is open at dusk or dawn, the sky changes slowly over about 20 seconds
+- **Switching by hand**: the switch at the bottom right still works. One tap switches by hand (the little clock icon disappears); a second tap goes back to local time, and so does the clock reaching the state you picked. A manual choice isn't saved, so every visit starts on local time
+- **The real moon phase**: the moon in the night sky is tonight's real phase (to within about an hour) — crescent, quarter, gibbous, full. Full-moon nights light the snow a little and wash out the faint stars; around new moon there's no moon at all. It always hangs low in the south-east where the camera can see it when you tilt up; its position isn't the real one
+- **Meteor showers**: on the peak night of the Perseids (night of Aug 12) and the Geminids (night of Dec 13) there are about 6× the usual shooting stars, and a few more on the nights either side. Shower meteors all fan out from one radiant point, and most of them appear in the part of the sky the camera faces. You get a short note when night falls
+- **Rare visitors**: while the page is open, roughly every 8–16 minutes (the first one no sooner than 3 minutes in) one may drop by — only one at a time, and never the same kind twice in a row:
+  - An arctic fox (usually Iceland's common dark "blue" morph, sometimes a white one): trots in, looks around, sniffs, maybe dives nose-first into the snow after a mouse, sits a moment and leaves the other way
+  - A snowy owl: glides down onto a rock or the snow, slowly swivels its head, blinks, fluffs its feathers and flies off after 20–30 seconds
+  - A pod of 3–5 orcas (a tall-finned male, females, sometimes a calf) passes along the coast far out at sea, surfacing together, and now and then one leaps clear of the water
+  - They never harm the puffins or take their food. Awake puffins nearby turn to watch, and step a few paces away along a safe route if the fox comes too close. Tap a visitor and it notices you (the fox stops and tilts its head, the owl swivels round and blinks, an orca blows a spout). Visitors near the volcano leave when it erupts, and none arrive mid-eruption
+- **Preview**: don't feel like waiting? Add parameters to the URL: `?date=2026-08-12&time=23:00` for the Perseids, `?date=2026-10-26&time=22:00` for a full moon, `?visitor=fox` (or `owl`, `orca`) to have a visitor arrive within seconds. They only change the sky and the visitors — never the save, cooldowns or daily caps
 
 ### Dev log
 
