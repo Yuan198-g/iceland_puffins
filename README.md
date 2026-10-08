@@ -70,7 +70,8 @@ Version 是完全没有目标的休闲观赏;**Edition** 在它之上加入可�
 - **痕迹**:狐狸在雪地上留下一串慢慢被雪填平的脚印;雪鸮来之前先传来叫声,飞走后留下一根羽毛;虎鲸离得远时先看到高高的水雾
 - **更常来**:第一位最快 1–3 分钟就来,之后大约每 4–8 分钟一位,仍然一次只来一位、不会伤害海雀
 - **周末流星雨**:每个周五、六、日晚上(按入夜那天算,周日夜延续到周一早上)流星约是平时的 4 倍,同一个周末辐射点固定、每周换一个方向;英仙座、双子座极大那一夜仍是 6 倍并提示名字
-- **声音**:海浪(离海越近、风越大越响)、风、火山的低鸣和喷发、鲸鱼的歌声和喷水、虎鲸的叫声和换气、雪鸮的叫声、狐狸扑雪、湖里的鱼跳水,全部用 Web Audio 实时合成,没有音频文件;离得越远越轻,左右声道跟着位置走。右下角的喇叭按钮可以静音,选择会被记住;浏览器要求先点一下或按一下键,声音才会开始
+- **声音**:海浪(离海越近、风越大越响)、风、火山的低鸣和喷发、点鲸鱼时它的喷水声、虎鲸的换气声、雪鸮的叫声、狐狸扑雪、湖里的鱼跳水,全部用 Web Audio 实时合成,没有音频文件;离得越远越轻,左右声道跟着位置走。右下角的喇叭按钮可以静音,选择会被记住;浏览器要求先点一下或按一下键,声音才会开始
+- **少打扰**:屏幕上方的提示只留给少见的时刻——火山冒白烟和喷发、稀客到来或被打扰离开、小鲸鱼出生、特别的夜晚、幼鸟的成长节点;投喂、喷水、鱼跳、鲸鱼跃出和拍尾、点稀客、手记里多了新记录都不再弹提示(手记按钮上的小黄点会告诉你有新内容)
 - **存档**:手记单独存在浏览器本地,不影响海雀的存档;损坏时会自动重新开始并保留一份备份。没有任务、倒计时或惩罚,不理稀客一切照旧
 
 ### 开发历程
@@ -156,7 +157,8 @@ Versions are the goal-free, just-watch builds. **Editions** add optional care pl
 - **Traces**: the fox leaves a line of prints that slowly fill back in with snow; the owl is heard before it's seen and leaves a feather where it sat; orcas far out show first as tall plumes of spray
 - **More often**: the first visitor can come within 1–3 minutes, then roughly every 4–8 minutes — still one at a time, and still never harming the puffins
 - **Weekend meteor showers**: every Friday, Saturday and Sunday night (counted from the evening, so Sunday night runs into Monday morning) has about 4× the usual shooting stars, with one radiant per weekend that moves from week to week; the Perseid and Geminid peak nights stay at 6× and keep their names
-- **Sound**: the sea (louder near the water and in the wind), the wind, the volcano's rumble and eruption, whale song and spouts, orca calls and blows, the owl's hoot, the fox's snow dive and the pond fish's plip — all synthesised live with Web Audio, no audio files. Sounds get quieter with distance and pan with position. The speaker button at the bottom right mutes it and remembers your choice; browsers need a first tap or key press before any sound can start
+- **Sound**: the sea (louder near the water and in the wind), the wind, the volcano's rumble and eruption, a whale's blow when you tap it, orcas breathing, the owl's hoot, the fox's snow dive and the pond fish's plip — all synthesised live with Web Audio, no audio files. Sounds get quieter with distance and pan with position. The speaker button at the bottom right mutes it and remembers your choice; browsers need a first tap or key press before any sound can start
+- **Fewer pop-ups**: messages at the top of the screen are kept for the rare moments — the volcano smoking and erupting, a visitor arriving (or leaving because it was disturbed), a whale calf, a special night, the chick's milestones. Feeding, spouts, fish jumps, whale breaches and tail slaps, tapping a visitor and new field-note entries no longer pop up (a small dot on the notes button tells you there's something new)
 - **Saving**: the notes live in their own local save, separate from the puffins'; an unreadable one is reset with a backup kept. No tasks, timers or penalties — ignore the visitors and everything is just as before
 
 ### Dev log

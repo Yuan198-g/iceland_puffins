@@ -497,16 +497,7 @@
       "wind.calm": "无风", "wind.breeze": "微风", "wind.strong": "劲风", "wind.gale": "暴风",
       day: "白昼", night: "极夜",
       langButton: "EN", langButtonLabel: "Switch to English",
-      "toast.puffinWoke": "被戳醒了,翻了个跟头",
-      "toast.puffinSpin": "扑棱一下,翻了个跟头",
-      "toast.foodLand": "撒了一点小鱼干",
-      "toast.fishJump": "鱼跳出了水面",
-      "toast.whaleSpout": "扑哧一声喷了个水柱",
-      "toast.whaleFed": "鲸鱼吃到啦,长大了一点",
       "toast.whaleCalf": "鲸鱼吃饱了,还带来了一只小鲸鱼",
-      "toast.whaleSlap": "啪!尾巴拍水",
-      "toast.whaleBreach": "轰!鲸鱼跃出水面",
-      "toast.foodSea": "往海里扔了点小鱼干",
       "toast.mountain": "这里是山,喂不了食",
       "toast.lavaHot": "熔岩太烫了,喂不了食",
       "toast.volcanoCharging": "火山还在积蓄能量… {p}%",
@@ -573,12 +564,8 @@
       "shower.perseids": "英仙座", "shower.geminids": "双子座",
       "sky.fullMoon": "满月当空",
       "visitor.fox.arrive": "一只北极狐溜达到了冰原上",
-      "visitor.fox.tap": "北极狐停下来,歪着头看了你一眼",
       "visitor.owl.arrive": "一只雪鸮落在了冰原上",
-      "visitor.owl.tap": "雪鸮慢慢转过头,眨了眨眼",
       "visitor.orca.arrive": "远处的海面上,一群虎鲸正在游过",
-      "visitor.orca.tap": "虎鲸呼地喷出一口气",
-      "visitor.orca.breach": "一头虎鲸跃出了海面!",
       "sky.showerWeekend": "周末流星雨:今晚流星比平时多",
       "sound.on": "声音:开(点一下静音)", "sound.off": "声音:关(点一下打开)",
       "notes.button": "观察手记", "notes.title": "观察手记",
@@ -595,8 +582,6 @@
       "notes.indVisits": "来过 {n} 次", "notes.name": "起名", "notes.rename": "改名", "notes.nameLabel": "给它起个名字",
       "notes.whenTitle": "什么时候见过它",
       "time.dawn": "清晨", "time.day": "白天", "time.dusk": "黄昏", "time.night": "夜里",
-      "notes.recorded": "📖 记进手记:{kind} · {beh}",
-      "notes.quietTip": "安静地看着它……别打扰,它也许会让你看到更多",
       "visitor.markSep": "——",
       "visitor.back": "「{name}」又来了 · 第 {n} 次来访",
       "visitor.disturbed": "{kind}被打扰了,先离开了",
@@ -637,16 +622,7 @@
       "wind.calm": "Calm", "wind.breeze": "Breeze", "wind.strong": "Strong", "wind.gale": "Gale",
       day: "Day", night: "Night",
       langButton: "中", langButtonLabel: "切换到中文",
-      "toast.puffinWoke": "Poked awake — backflip!",
-      "toast.puffinSpin": "Flap flap — a backflip!",
-      "toast.foodLand": "Scattered a few fish snacks",
-      "toast.fishJump": "A fish leapt out of the water",
-      "toast.whaleSpout": "Pfft — a spout of water!",
-      "toast.whaleFed": "The whale ate and grew a little",
       "toast.whaleCalf": "Well fed — and a calf has come along!",
-      "toast.whaleSlap": "Splash! A tail slap",
-      "toast.whaleBreach": "Whoosh! The whale breached",
-      "toast.foodSea": "Tossed some fish snacks into the sea",
       "toast.mountain": "That's a mountain — can't feed there",
       "toast.lavaHot": "Too hot — that's lava",
       "toast.volcanoCharging": "The volcano is still building up… {p}%",
@@ -713,12 +689,8 @@
       "shower.perseids": "Perseid", "shower.geminids": "Geminid",
       "sky.fullMoon": "A full moon is up",
       "visitor.fox.arrive": "An arctic fox has wandered onto the ice",
-      "visitor.fox.tap": "The arctic fox stops and tilts its head at you",
       "visitor.owl.arrive": "A snowy owl has landed on the ice",
-      "visitor.owl.tap": "The snowy owl swivels its head and blinks at you",
       "visitor.orca.arrive": "Out at sea, a pod of orcas is passing by",
-      "visitor.orca.tap": "Whoosh — the orca blows a spout",
-      "visitor.orca.breach": "An orca leaps clear of the water!",
       "sky.showerWeekend": "Weekend meteor shower — more shooting stars tonight",
       "sound.on": "Sound on (tap to mute)", "sound.off": "Sound off (tap to turn on)",
       "notes.button": "Field notes", "notes.title": "Field notes",
@@ -735,8 +707,6 @@
       "notes.indVisits": "visits: {n}", "notes.name": "Name", "notes.rename": "Rename", "notes.nameLabel": "Give it a name",
       "notes.whenTitle": "When you've met it",
       "time.dawn": "Morning", "time.day": "Day", "time.dusk": "Dusk", "time.night": "Night",
-      "notes.recorded": "📖 Field notes: {kind} — {beh}",
-      "notes.quietTip": "Watch quietly… leave it be, and it may show you a little more",
       "visitor.markSep": " — ",
       "visitor.back": "{name} is back — visit #{n}",
       "visitor.disturbed": "The {kind} was disturbed and left early",
@@ -2263,7 +2233,7 @@
     return w;
   }
   function emptyNotes() {
-    var n = { version: NOTES_VERSION, kinds: {}, individuals: {}, lastOpened: 0, quietTipShown: false };
+    var n = { version: NOTES_VERSION, kinds: {}, individuals: {}, lastOpened: 0 };
     NOTE_KINDS.forEach(function (k) {
       var kind = { visits: 0, behaviors: {}, times: {}, winds: {} };
       NOTE_BEHAVIORS[k].forEach(function (b) { kind.behaviors[b] = 0; });
@@ -2302,7 +2272,6 @@
       d.customName = s.customName == null ? null : cleanName(s.customName);
     });
     n.lastOpened = noteStamp(raw.lastOpened);
-    n.quietTipShown = raw.quietTipShown === true;
     return n;
   }
   // unreadable or from an unknown version: start fresh, keep a copy aside
@@ -3086,7 +3055,6 @@
     p.headPivot.rotation.x = 0;
     p.headPivot.rotation.z = 0;
     p.root.rotation.z = 0;
-    showToast(t(wasAsleep ? "toast.puffinWoke" : "toast.puffinSpin"));
     // a sudden backflip right next to a timid neighbour makes it flinch
     for (var i = 0; i < puffins.length; i++) {
       var q = puffins[i];
@@ -3120,7 +3088,6 @@
 
     var food = { group: g, pos: new THREE.Vector2(x, z), active: true, born: performance.now(), eaten: false, skipPopIn: false, byPlayer: true };
     foods.push(food);
-    showToast(t("toast.foodLand"));
     for (var si = 0; si < puffins.length; si++) {
       var sp2 = puffins[si];
       var sd = Math.hypot(sp2.root.position.x - x, sp2.root.position.z - z);
@@ -3284,7 +3251,6 @@
     fish.jumpT = 0;
     fish.state = "jump";
     playSfx("plip", fish.root.position);
-    showToast(t("toast.fishJump"));
   }
 
   function updateFish(dt, elapsed) {
@@ -3501,7 +3467,6 @@
     var worldPos = w.root.localToWorld(w.blowholeLocal.clone());
     spawnBurst(worldPos, 14, "#F4FAFC", 1.2, 2.6, 0.35);
     playSfx("spout", worldPos, true);
-    showToast(t("toast.whaleSpout"));
   }
 
   var WHALE_FOOD_RANGE = 55;
@@ -3538,7 +3503,6 @@
           w.riseT = 0;
           w.state = "rising";
           spawnBurst(new THREE.Vector3(w.pos.x, oceanSurfaceY(w.pos.x, w.pos.y, elapsed, windFactor), w.pos.y), 10, "#EAF6FB", 0.6, 1.6, 0.7);
-          playSfx("splash", w.root.position, 0.25);
         }
         continue;
       }
@@ -3567,7 +3531,6 @@
             w.scale = Math.min(MAX_WHALE_SCALE, w.scale + FEED_GROW);
             w.state = "present";
             w.presentTimer = 3 + Math.random() * 3;
-            showToast(t("toast.whaleFed"));
             if (!w.isCalf && !w.hasSpawnedCalf && w.scale >= MAX_WHALE_SCALE - 0.001) {
               w.hasSpawnedCalf = true;
               spawnWhaleSlot({
@@ -3621,8 +3584,6 @@
           if (!w.slapped && sp > 0.42) {
             w.slapped = true;
             spawnBurst(w.tailPivot.getWorldPosition(new THREE.Vector3()), 16, "#EAF6FB", 1.0, 2.2, 0.5);
-            playSfx("splash", w.root.position, 0.6);
-            showToast(t("toast.whaleSlap"));
           }
           if (sp >= 1) { w.action = null; }
         }
@@ -3638,14 +3599,11 @@
           if (!w.breachSplashed && bp > 0.05) {
             w.breachSplashed = true;
             spawnBurst(new THREE.Vector3(w.pos.x, surfY2, w.pos.y), 14, "#EAF6FB", 1.0, 2.4, 0.6);
-            playSfx("splash", w.root.position, 0.8);
-            showToast(t("toast.whaleBreach"));
           }
           if (bp >= 1) {
             w.action = null;
             w.bob.rotation.x = 0;
             spawnBurst(new THREE.Vector3(w.pos.x, surfY2, w.pos.y), 18, "#EAF6FB", 1.2, 2.8, 0.7);
-            playSfx("splash", w.root.position, 1);
           }
         }
 
@@ -4067,7 +4025,6 @@
 
     var food = { group: g, pos: new THREE.Vector2(x, z), active: true, born: performance.now(), eaten: false, skipPopIn: false };
     foods.push(food);
-    showToast(t("toast.foodSea"));
     attractWhaleToFood(food);
     scareVisitorWithFood(x, z, true);
   }
@@ -4215,8 +4172,7 @@
     if (seen[behavior] || !seenOnScreen(pos, WITNESS_RANGE[v.kind])) return;
     seen[behavior] = Date.now();
     saveNotes();
-    showToast(t("notes.recorded", { kind: t("kindTitle." + v.kind), beh: t("beh." + v.kind + "." + behavior) }), 3000);
-    refreshNotesUI();
+    refreshNotesUI(); // no toast: the dot on the notes button says there's something new
   }
   // each visit is logged as it arrives: when, in what wind, and which regular it was
   function noteVisit(v) {
@@ -4953,7 +4909,7 @@
     var v = {
       kind: "orca", ind: ind, members: [], roots: [], mats: [], alpha: 1, laneZ: laneZ, dir: dir,
       x0: cx - dir * ORCA_LANE_HALF, x1: cx + dir * ORCA_LANE_HALF, t: 0, dist: 0,
-      leaving: false, taps: 0, quiet: newQuiet(), callT: 2 + Math.random() * 3,
+      leaving: false, taps: 0, quiet: newQuiet(),
       breach: Math.random() < 0.6 ? { who: breachWho, at: 0.35 + Math.random() * 0.3, t: -1 } : null,
       slap: Math.random() < 0.5 ? { who: (breachWho + 1) % Math.min(n, 3), at: 0.5 + Math.random() * 0.3, t: -1 } : null
     };
@@ -4994,12 +4950,6 @@
     var br = v.breach, sl = v.slap;
     if (br && br.t < 0 && !v.leaving && progress > br.at && v.members[br.who].under) br.t = 0; // only from under the water
     if (sl && sl.t < 0 && !v.leaving && progress > sl.at && v.members[sl.who].under && !(br && br.who === sl.who && br.t >= 0)) sl.t = 0;
-    // they call to each other now and then
-    v.callT -= dt;
-    if (v.callT <= 0) {
-      v.callT = 3 + Math.random() * 5;
-      playSfx("orcaCall", v.members[Math.floor(Math.random() * v.members.length)].b.root.position);
-    }
     v.members.forEach(function (m, i) {
       var root = m.b.root;
       if (!m.spy) m.lag = Math.max(0, m.lag - ORCA_SPEED * 0.5 * dt); // catching back up after a spyhop
@@ -5019,13 +4969,10 @@
         if (!br.out && kb > 0.08) {
           br.out = true;
           spawnBurst(new THREE.Vector3(x, surf, z), 18, "#EAF6FB", 1.2, 2.8, 0.7);
-          playSfx("splash", at, 0.8);
-          showToast(t("visitor.orca.breach"), 2200);
         }
         if (!br.back && kb > 0.9) {
           br.back = true;
           spawnBurst(new THREE.Vector3(x, surf, z), 22, "#EAF6FB", 1.4, 3.2, 0.9);
-          playSfx("splash", at, 1);
         }
         if (kb > 0.15 && kb < 0.85) witness(v, "breach", at);
         if (kb >= 1) {
@@ -5044,7 +4991,6 @@
         if (!sl.hit && ks > 0.6) {
           sl.hit = true;
           spawnBurst(new THREE.Vector3(tp.x, surf, tp.z), 20, "#EAF6FB", 1.2, 3.0, 0.8);
-          playSfx("splash", tp, 0.7);
         }
         if (ks > 0.3 && ks < 0.8) witness(v, "tailslap", tp);
         if (ks >= 1) { v.slap = null; m.phase = orcaPhaseFor(v, 0.45); }
@@ -5166,11 +5112,6 @@
     var watching = !!anchor && seenOnScreen(anchor, QUIET_CFG.NEAR[v.kind]);
     if (watching) {
       q.p = Math.min(1, q.p + dt / QUIET_CFG.SECONDS[v.kind]);
-      if (!notes.quietTipShown && q.p > 0.15) {
-        notes.quietTipShown = true;
-        saveNotes();
-        showToast(t("notes.quietTip"), 3600);
-      }
       if (q.p >= 1) { q.done = true; startQuietBehavior(v); }
     } else if (!q.done) {
       q.p = Math.max(0, q.p - dt / 30); // looking away just lets it fade slowly
@@ -5189,12 +5130,10 @@
   function tapVisitor(box) {
     var v = box.userData.visitor;
     if (!v || v !== visitor || v.leaving) return false;
-    var msg;
     if (v.kind === "fox") {
       if (v.alpha < 0.5) return false;
       if (v.act !== "pounce" && !v.fled) { v.noticeT = FOX_ACT_DUR.notice; v.act = null; }
       playSfx("foxYip", v.b.root.position);
-      msg = "visitor.fox.tap";
     } else if (v.kind === "owl") {
       if (v.phase !== "perch") return false;
       // swivel round to face you (as far as an owl's neck goes) and blink twice
@@ -5206,20 +5145,17 @@
       v.blinkT = 0.4;
       v.dozeT = 0;
       playSfx("owlHoot", v.b.root.position);
-      msg = "visitor.owl.tap";
     } else {
       var m = v.members[box.userData.member];
       if (!m || !m.up) return false; // only while it's actually at the surface
       var bh = m.b.root.localToWorld(m.b.blowholeLocal.clone());
       spawnBurst(bh, 14, "#F4FAFC", 1.2, 2.6, 0.35);
       playSfx("spout", bh, true);
-      msg = "visitor.orca.tap";
     }
     // every tap breaks the quiet, and one too many sends it off
     v.quiet.p = 0;
     v.taps++;
     if (v.taps >= QUIET_CFG.TAPS_TO_LEAVE) disturbVisitor(v);
-    else showToast(t(msg), 2400);
     return true;
   }
 
@@ -6125,8 +6061,9 @@
   // ===============================================================
   // 11b. E4 — sound. All synthesised on the fly with the Web Audio API, no
   //      audio files: the sea and the wind as soft beds under everything,
-  //      the volcano's rumble, and one-off sounds for whales, orcas, the owl,
-  //      the fox and the pond fish — quieter the further away they are.
+  //      the volcano's rumble, and one-off sounds: a whale's blow when you
+  //      tap it, orcas breathing, the owl, the fox and the pond fish —
+  //      quieter the further away they are.
   //      One tap mutes it (remembered); browsers only let it start after
   //      the player has tapped or pressed a key.
   // ===============================================================
@@ -6265,28 +6202,6 @@
     spout: function (A, w, out, big) {
       noiseHit(A, w, out, { type: "bandpass", freq: 1400, freq2: 650, q: 0.6, attack: 0.04, decay: big ? 1.1 : 0.7, gain: 0.9 });
     },
-    splash: function (A, w, out, size) {
-      size = size || 0.5;
-      noiseHit(A, w, out, { type: "lowpass", freq: 2200, freq2: 380, attack: 0.01, decay: 0.5 + size * 0.9, gain: 0.7 + size * 0.4 });
-      noiseHit(A, w + 0.05, out, { type: "highpass", freq: 2600, attack: 0.005, decay: 0.25 + size * 0.3, gain: 0.3 });
-    },
-    whaleSong: function (A, w, out) {
-      // two or three long, low moans that rise and fall
-      var base = 140 + Math.random() * 80, n = 2 + Math.floor(Math.random() * 2);
-      for (var i = 0; i < n; i++) {
-        var a = base * (0.9 + Math.random() * 0.5), b = a * (1.3 + Math.random() * 0.6), c = a * (0.8 + Math.random() * 0.3);
-        tone(A, w + i * 2.1, out, { type: "triangle", f: [[0, a], [0.9, b], [1.8, c]], attack: 0.5, hold: 0.8, release: 0.6, gain: 0.35, vib: 4, vibRate: 4.5, lp: 900 });
-      }
-    },
-    orcaCall: function (A, w, out) {
-      // a rising whistle, then a short train of echolocation clicks
-      var a = 900 + Math.random() * 500, b = a * (1.6 + Math.random() * 0.6);
-      tone(A, w, out, { type: "sine", f: [[0, a], [0.25, b], [0.6, a * 1.1]], attack: 0.04, hold: 0.4, release: 0.2, gain: 0.16, vib: 40, vibRate: 11 });
-      var clicks = 6 + Math.floor(Math.random() * 8), t0 = w + 0.75;
-      for (var i = 0; i < clicks; i++) {
-        noiseHit(A, t0 + i * (0.035 + Math.random() * 0.03), out, { type: "highpass", freq: 3000, attack: 0.002, decay: 0.012, gain: 0.35 });
-      }
-    },
     owlHoot: function (A, w, out) {
       // a snowy owl's deep, booming "hoo… hoo"
       for (var i = 0; i < 2; i++) {
@@ -6316,8 +6231,8 @@
     }
   };
   // how far each sound carries, and how much of it goes to the reverb
-  var SFX_RANGE = { spout: 140, splash: 120, whaleSong: 240, orcaCall: 200, owlHoot: 120, foxYip: 50, snowPoof: 45, boom: 400, whoosh: 160, plip: 40 };
-  var SFX_WET = { whaleSong: 0.8, orcaCall: 0.6, owlHoot: 0.7, boom: 0.5, spout: 0.15, splash: 0.15 };
+  var SFX_RANGE = { spout: 140, owlHoot: 120, foxYip: 50, snowPoof: 45, boom: 400, whoosh: 160, plip: 40 };
+  var SFX_WET = { owlHoot: 0.7, boom: 0.5, spout: 0.15 };
   // ---- end sound synthesis ----
 
   var _sndPos = new THREE.Vector3();
@@ -6326,7 +6241,10 @@
     var vol = 1, pan = 0;
     if (pos) {
       var d = camera.position.distanceTo(pos);
-      vol = Math.pow(Math.max(0, 1 - d / (SFX_RANGE[name] || 100)), 1.5);
+      // a spout you tapped carries twice as far: it's the one sound a whale makes,
+      // and whales are usually a long way out
+      var range = (SFX_RANGE[name] || 100) * (name === "spout" && arg ? 2 : 1);
+      vol = Math.pow(Math.max(0, 1 - d / range), 1.5);
       _sndPos.copy(pos).project(camera);
       pan = THREE.MathUtils.clamp(_sndPos.x, -1, 1) * (_sndPos.z < 1 ? 0.8 : 0.3); // behind you: barely panned
       if (!isFinite(pan)) pan = 0; // e.g. a zero-sized window gives the camera no aspect ratio
@@ -6379,16 +6297,10 @@
   // the beds follow the scene: the sea is louder near the water and in the wind,
   // swells come and go, the wind follows the slider, and the volcano rumbles
   // more the closer it is to erupting (and roars while it does)
-  var whaleSongT = 20 + Math.random() * 20, audioTick = 0;
+  var audioTick = 0;
   var VOLCANO_EAR = new THREE.Vector3(VOLCANO.x, 10, VOLCANO.z);
   function updateAudio(dt, elapsed) {
     if (!au || au.ctx.state !== "running") return;
-    whaleSongT -= dt;
-    if (whaleSongT <= 0) {
-      whaleSongT = 25 + Math.random() * 35;
-      var singer = whales.filter(function (w) { return w.state === "present" || w.state === "feeding"; })[0];
-      if (singer) playSfx("whaleSong", singer.root.position);
-    }
     audioTick -= dt;
     if (audioTick > 0) return;
     audioTick = 0.1;
@@ -6397,10 +6309,10 @@
     var near = THREE.MathUtils.clamp(1 - Math.max(0, overLand) / 70, 0.18, 1) *
       THREE.MathUtils.clamp(1 - (camera.position.y - 10) / 160, 0.35, 1);
     var swell = 0.55 + 0.45 * Math.sin(elapsed * 2 * Math.PI / 7.5) * Math.sin(elapsed * 0.31 + 1);
-    au.sea.gain.gain.setTargetAtTime(0.5 * near * (0.6 + 0.6 * wind) * (0.6 + 0.4 * swell), now, 0.3);
+    au.sea.gain.gain.setTargetAtTime(0.25 * near * (0.6 + 0.6 * wind) * (0.6 + 0.4 * swell), now, 0.3);
     au.sea.filter.frequency.setTargetAtTime(260 + 380 * swell + 500 * wind, now, 0.3);
-    au.surf.gain.gain.setTargetAtTime(0.25 * near * Math.pow(Math.max(0, swell), 3) * (0.5 + wind), now, 0.25);
-    au.wind.gain.gain.setTargetAtTime(0.03 + 0.45 * Math.pow(wind, 1.4), now, 0.4);
+    au.surf.gain.gain.setTargetAtTime(0.125 * near * Math.pow(Math.max(0, swell), 3) * (0.5 + wind), now, 0.25);
+    au.wind.gain.gain.setTargetAtTime(0.015 + 0.225 * Math.pow(wind, 1.4), now, 0.4);
     au.wind.filter.frequency.setTargetAtTime(380 + 500 * wind + 180 * Math.sin(elapsed * 0.37), now, 0.6);
     var vs = volcanoState;
     var rumble = vs.phase === "erupting" ? 0.9 : vs.phase === "ready" ? 0.25 : vs.phase === "cooling" ? 0.12 : 0.08 * Math.max(0, vs.charge - 0.5);
