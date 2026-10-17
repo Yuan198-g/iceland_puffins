@@ -61,7 +61,7 @@ Version 是完全没有目标的休闲观赏;**Edition** 在它之上加入可�
   - 它们不会伤害海雀,也不抢食。附近醒着的海雀会转头盯着看,狐狸走得太近时海雀会沿安全路线走开几步。点一下稀客,它会注意到你(狐狸停下歪头,雪鸮转头眨眼,虎鲸喷一口气)。火山喷发时附近的稀客会先离开,喷发中也不会有新的稀客来
 - **预览**:不想等的话,可以在网址后面加参数:`?date=2026-08-12&time=23:00` 看英仙座流星雨,`?date=2026-10-26&time=22:00` 看满月,`?visitor=fox`(或 `owl`、`orca`)让稀客几秒后就来。参数只影响天空和稀客,不会改动存档、冷却或每日上限
 
-**E4 · 观察手记与声音**(当前版本,快照 [E4.html](E4.html))
+**E4 · 观察手记与声音**(快照 [E4.html](E4.html))
 
 - **观察手记**:左上角「观察手记」,北极狐、雪鸮、虎鲸各一页。稀客在镜头里做出某个样子时会记下来,每种 4 个:北极狐的嗅闻、扑鼠、刨雪藏食、蜷成一团打盹;雪鸮的无声滑翔、大转头、抖松羽毛、眯眼打盹;虎鲸的换气、跃身击浪、拍尾、浮窥。每条配一句真实的小知识,没看到的只显示「？？？」,不显示进度数字
 - **安静观察**:稀客停下来时把镜头靠近,不去点它,它身边会亮起一圈小光环,大约 9 秒(虎鲸约 7 秒)填满,然后会做出平时看不到的样子——狐狸蜷成一团打盹、雪鸮眯眼打盹、离你最近的虎鲸竖起头浮窥。点一下它会注意到你,但光环会清零;一次来访里点到第三下,或在它身边撒食物,它就会提前离开
@@ -73,6 +73,18 @@ Version 是完全没有目标的休闲观赏;**Edition** 在它之上加入可�
 - **声音**:海浪(离海越近、风越大越响)、风、火山的低鸣和喷发、点鲸鱼时它的喷水声、虎鲸的换气声、雪鸮的叫声、狐狸扑雪、湖里的鱼跳水,全部用 Web Audio 实时合成,没有音频文件;离得越远越轻,左右声道跟着位置走。右下角的喇叭按钮可以静音,选择会被记住;浏览器要求先点一下或按一下键,声音才会开始
 - **少打扰**:屏幕上方的提示只留给少见的时刻——火山冒白烟和喷发、稀客到来或被打扰离开、小鲸鱼出生、特别的夜晚、幼鸟的成长节点;投喂、喷水、鱼跳、鲸鱼跃出和拍尾、点稀客、手记里多了新记录都不再弹提示(手记按钮上的小黄点会告诉你有新内容)
 - **存档**:手记单独存在浏览器本地,不影响海雀的存档;损坏时会自动重新开始并保留一份备份。没有任务、倒计时或惩罚,不理稀客一切照旧
+
+**E5 · 鲱鱼球:一场海上的围猎**(当前版本,快照 [E5.html](E5.html))
+
+- **原型**:北大西洋真实存在的「旋转木马式捕食」——虎鲸合作把鲱鱼赶成密集的鱼球,用尾巴拍晕再吃;座头鲸从下方冲上来一口吞下一片,海鸟和海雀从上方扎进水里
+- **怎么发生**:大约每 12–20 分钟一次(第一次最早 2.5 分钟后),有稀客在场或火山喷发时不会开始。开始时只提示一句「远处的海面上海鸟在盘旋」,远远能看到海鸥盘旋、海面发暗翻腾、闪着银光
+- **一场完整的大戏**(约 100 秒):鱼群聚拢成球 → 你认识的那群虎鲸绕圈收紧、浮上来换气 → 虎鲸用尾巴拍晕边上的鱼再吃掉,几只成年海雀从岸上飞来扎进海里,在水下追鱼,横叼着一排小鱼飞回原处 → 座头鲸从鱼球正下方竖直冲上来破水而出 → 鱼群四散,虎鲸和海鸥离开
+- **鱼群模拟**:1400 条鲱鱼(深色的背、银白的腹、叉尾和一对眼睛)实时计算,绕着同一个中心转圈、各自守在鱼球的一层里,遇到虎鲸、海雀、座头鲸会躲开,被拍晕的鱼侧翻抽动,冲散后再聚拢,每次都不一样
+- **潜入水下**:屏幕上方的小条可以「去看看」(镜头飞到鱼球上空)或「潜入水下」——镜头沉到海面下,蓝绿色的海水、透下来的光柱、漂浮的微粒,抬头能看到波光粼粼的海面,声音也会变闷;水下点击不会影响岸上,按「回到水面」或 Esc 回来,结束时会自动浮上来
+- **观察手记**:新增「鲱鱼球」一页,四个场面:鱼群成球、虎鲸拍尾震鱼、海雀潜水叼鱼、座头鲸冲吞。其中鱼群成球和海雀潜水只有潜到水下才看得到;不弹提示,手记按钮上的小黄点会亮
+- **声音**:虎鲸换气不再自己发出声音(鲱鱼球里和来访时都是),只有点一下露出水面的鲸鱼或虎鲸才会听到喷气声
+- **兼容**:海雀出海期间不会被投喂、抚摸、翻跟头或火山打扰,回来后一切照旧;幼鸟和少年不会去。手记存档自动兼容 E4,不影响海雀的存档
+- **预览**:网址后面加 `?event=baitball`,几秒后就会开始一场
 
 ### 开发历程
 
@@ -148,7 +160,7 @@ Versions are the goal-free, just-watch builds. **Editions** add optional care pl
   - They never harm the puffins or take their food. Awake puffins nearby turn to watch, and step a few paces away along a safe route if the fox comes too close. Tap a visitor and it notices you (the fox stops and tilts its head, the owl swivels round and blinks, an orca blows a spout). Visitors near the volcano leave when it erupts, and none arrive mid-eruption
 - **Preview**: don't feel like waiting? Add parameters to the URL: `?date=2026-08-12&time=23:00` for the Perseids, `?date=2026-10-26&time=22:00` for a full moon, `?visitor=fox` (or `owl`, `orca`) to have a visitor arrive within seconds. They only change the sky and the visitors — never the save, cooldowns or daily caps
 
-**E4 · Field notes & sound** (current build, snapshot [E4.html](E4.html))
+**E4 · Field notes & sound** (snapshot [E4.html](E4.html))
 
 - **Field notes**: "Field notes" at the top left, with a page each for the arctic fox, the snowy owl and the orcas. When a visitor does something on screen it's written down — four things per kind: the fox sniffing, pouncing on a mouse, caching food and curling up to doze; the owl's silent glide, head swivel, fluffing up and dozing; the orcas breathing, breaching, tail-slapping and spyhopping. Each comes with a short real-life fact; anything not yet seen shows as "???", and there's no progress count
 - **Quiet watching**: when a visitor settles, bring the camera close and leave it be, and a small ring fills around it in about 9 seconds (orcas about 7). Then it shows you something it doesn't otherwise do — the fox curls up to doze, the owl squints and dozes, the nearest orca spyhops. A tap makes it notice you but empties the ring; a third tap in one visit, or food dropped right beside it, and it leaves early
@@ -160,6 +172,18 @@ Versions are the goal-free, just-watch builds. **Editions** add optional care pl
 - **Sound**: the sea (louder near the water and in the wind), the wind, the volcano's rumble and eruption, a whale's blow when you tap it, orcas breathing, the owl's hoot, the fox's snow dive and the pond fish's plip — all synthesised live with Web Audio, no audio files. Sounds get quieter with distance and pan with position. The speaker button at the bottom right mutes it and remembers your choice; browsers need a first tap or key press before any sound can start
 - **Fewer pop-ups**: messages at the top of the screen are kept for the rare moments — the volcano smoking and erupting, a visitor arriving (or leaving because it was disturbed), a whale calf, a special night, the chick's milestones. Feeding, spouts, fish jumps, whale breaches and tail slaps, tapping a visitor and new field-note entries no longer pop up (a small dot on the notes button tells you there's something new)
 - **Saving**: the notes live in their own local save, separate from the puffins'; an unreadable one is reset with a backup kept. No tasks, timers or penalties — ignore the visitors and everything is just as before
+
+**E5 · The bait ball: a hunt at sea** (current build, snapshot [E5.html](E5.html))
+
+- **The real thing**: North Atlantic "carousel feeding" — orcas work together to herd herring into a tight ball and stun them with tail slaps before eating, humpbacks lunge up through it from below, and seabirds and puffins plunge in from above
+- **When**: about every 12–20 minutes (the first no sooner than 2.5 minutes in), and never while a visitor is around or the volcano is erupting. It starts with a single note — seabirds wheeling far out at sea — and from the shore you can see the gulls circling and the water darkening, boiling and flashing silver
+- **The whole scene** (about 100 seconds): the shoal gathers into a ball → the orca pod you know circles to tighten it and comes up to breathe → orcas stun fish at the edge with tail slaps and eat them, while a few adult puffins fly out from shore, plunge in, chase fish underwater and fly home with a row of them crosswise in their beaks → a humpback lunges straight up from beneath the ball and bursts through the surface → the fish scatter, and the orcas and gulls leave
+- **The shoal**: 1,400 herring (dark backs, silver bellies, forked tails and a pair of eyes) simulated live, circling one centre with each fish keeping its own layer of the ball, dodging orcas, puffins and the humpback, stunned fish rolling and twitching, the ball scattering and re-forming — never the same twice
+- **Dive under**: the bar at the top offers "Take a look" (the camera flies out over the ball) and "Dive under" — the camera sinks below the surface into blue-green water with shafts of light and drifting specks, the rippling surface overhead and every sound muffled. Taps under the water don't reach the shore; "Back up" or Esc brings you back, and it surfaces by itself when it's over
+- **Field notes**: a new "Bait ball" page with four moments — the ball forming, a tail-slap stun, puffins diving and the humpback's lunge. The ball forming and the puffins diving can only be seen from under the water. No pop-ups; the dot on the notes button lights up
+- **Sound**: orcas no longer make a sound when they come up to breathe (at the bait ball or as visitors); you only hear a spout when you tap a whale or an orca at the surface
+- **Compatibility**: a puffin out fishing can't be fed, petted, flipped or scared by the volcano, and is just as before once home; chicks and juveniles don't go. The notes save carries straight over from E4, and the puffins' own save is untouched
+- **Preview**: add `?event=baitball` to the URL and one starts within seconds
 
 ### Dev log
 

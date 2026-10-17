@@ -110,6 +110,16 @@
   #dayToggle .auto-ico{ width:12px; height:12px; color:var(--ink-soft); flex:none; }
   #dayToggle.manual .auto-ico{ display:none; }
 
+  /* ---- E5: the bait ball's bar, and the splash into the water ---- */
+  #seaBar{
+    position:fixed; z-index:13; top:74px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:10px; padding:7px 8px 7px 14px; border-radius:999px;
+    color:var(--ink); font-size:12.5px; white-space:nowrap;
+  }
+  #seaBar .sb-ico{ font-size:15px; line-height:1; }
+  #diveFlash{ position:fixed; inset:0; z-index:40; pointer-events:none; background:#0E5162; opacity:0; transition:opacity .26s ease; }
+  #diveFlash.on{ opacity:1; }
+
   /* ---- E4: sound switch, field notes ---- */
   #soundToggle{
     display:flex; align-items:center; justify-content:center; color:var(--ink); cursor:pointer;
@@ -314,6 +324,7 @@
     #title-block .notes-pill{ margin-top:8px; }
     #notesPanel{ top:58px; left:12px; right:12px; width:auto; max-height:calc(100vh - 230px); }
     #panel .ctrl-label{ display:none; } /* room for the sound switch */
+    #seaBar{ top:104px; left:12px; right:12px; transform:none; justify-content:center; flex-wrap:wrap; white-space:normal; border-radius:16px; }
   }
   @media (max-width: 360px){
     /* the smallest phones: the slider alone says enough */
@@ -351,9 +362,18 @@
     <button type="button" class="np-tab" data-kind="fox" aria-selected="true"><span aria-hidden="true">🦊</span> <span data-i18n="kindTitle.fox">北极狐</span></button>
     <button type="button" class="np-tab" data-kind="owl" aria-selected="false"><span aria-hidden="true">🦉</span> <span data-i18n="kindTitle.owl">雪鸮</span></button>
     <button type="button" class="np-tab" data-kind="orca" aria-selected="false"><span aria-hidden="true">🐋</span> <span data-i18n="kindTitle.orca">虎鲸</span></button>
+    <button type="button" class="np-tab" data-kind="baitball" aria-selected="false"><span aria-hidden="true">🐟</span> <span data-i18n="kindTitle.baitball">鲱鱼球</span></button>
   </div>
   <div id="notesBody"></div>
 </div>
+
+<div id="seaBar" class="glass" hidden>
+  <span class="sb-ico" aria-hidden="true">🐟</span>
+  <span class="sb-txt" data-i18n="bait.bar">海面上出现了一个鲱鱼球</span>
+  <button type="button" id="seaGo" class="pill-btn" data-i18n="bait.go">去看看</button>
+  <button type="button" id="seaDive" class="pill-btn primary">潜入水下</button>
+</div>
+<div id="diveFlash" aria-hidden="true"></div>
 
 <div class="hud" id="hint">
   <span data-i18n-html="hint.ground"><b>点地面</b> 喂食</span>
@@ -603,7 +623,17 @@
       "beh.orca.breathe": "换气", "fact.orca.breathe": "虎鲸换气时喷出的水雾又矮又蓬,一群里常常轮流浮上来。",
       "beh.orca.breach": "跃身击浪", "fact.orca.breach": "整个身子跃出水面再重重落下,可能是在交流,也可能只是玩。",
       "beh.orca.tailslap": "拍尾", "fact.orca.tailslap": "用尾鳍拍打水面,声音在水下能传得很远。",
-      "beh.orca.spyhop": "浮窥", "fact.orca.spyhop": "竖直地把头探出水面,看看海面上发生了什么。"
+      "beh.orca.spyhop": "浮窥", "fact.orca.spyhop": "竖直地把头探出水面,看看海面上发生了什么。",
+      "bait.start": "远处的海面上海鸟在盘旋——「{pod}」正在围捕鲱鱼",
+      "bait.bar": "海面上出现了一个鲱鱼球", "bait.go": "去看看", "bait.dive": "潜入水下", "bait.surface": "回到水面",
+      "state.fishing": "出海捕鱼",
+      "kindTitle.baitball": "鲱鱼球",
+      "kindFact.baitball": "鲱鱼遇到危险会挤成一个旋转的球,可这反而给了捕食者机会:北大西洋的虎鲸会合作把鱼赶成球、用尾巴拍晕再慢慢吃掉,座头鲸和海鸟也会闻讯赶来。",
+      "notes.baitSeen": "见过 {n} 次", "notes.momentsTitle": "看到过的场面", "notes.diveHint": "也许要潜到水下才看得到",
+      "moment.ball": "鱼群成球", "mfact.ball": "成千上万条鲱鱼绕着同一个中心转圈,谁都不想落在最外面。",
+      "moment.slap": "虎鲸拍尾震鱼", "mfact.slap": "虎鲸用尾巴猛地一甩,把鱼群边上的鲱鱼震晕,再一条条吃掉。",
+      "moment.dive": "海雀潜水叼鱼", "mfact.dive": "海雀在水下扇着翅膀「飞」,一次能横叼好几条小鱼回去。",
+      "moment.lunge": "座头鲸冲吞", "mfact.lunge": "座头鲸从鱼群下方张大嘴直冲上来,一口吞下一大片鱼。"
     },
     en: {
       docTitle: "Aurora Puffins · 极夜海雀",
@@ -728,7 +758,17 @@
       "beh.orca.breathe": "Coming up to breathe", "fact.orca.breathe": "An orca's blow is short and bushy, and a pod often surfaces in turn.",
       "beh.orca.breach": "Breaching", "fact.orca.breach": "Leaping clear and crashing back may be a way of talking — or just play.",
       "beh.orca.tailslap": "Tail slap", "fact.orca.tailslap": "Slapping the flukes on the water makes a sound that carries a long way underwater.",
-      "beh.orca.spyhop": "Spyhopping", "fact.orca.spyhop": "Rising straight up with its head out of the water to have a look around."
+      "beh.orca.spyhop": "Spyhopping", "fact.orca.spyhop": "Rising straight up with its head out of the water to have a look around.",
+      "bait.start": "Seabirds are wheeling far out at sea — {pod} is rounding up herring",
+      "bait.bar": "A herring bait ball out at sea", "bait.go": "Take a look", "bait.dive": "Dive under", "bait.surface": "Back up",
+      "state.fishing": "out fishing",
+      "kindTitle.baitball": "Bait ball",
+      "kindFact.baitball": "Herring under threat crowd into a spinning ball — just what their hunters want. North Atlantic orcas herd them tight, stun them with tail slaps and eat at leisure, and humpbacks and seabirds join in.",
+      "notes.baitSeen": "Seen: {n}", "notes.momentsTitle": "Moments seen", "notes.diveHint": "Perhaps you have to dive under to see it",
+      "moment.ball": "The ball forms", "mfact.ball": "Thousands of herring circle one centre, none of them wanting to be on the outside.",
+      "moment.slap": "Tail-slap stun", "mfact.slap": "One hard flick of an orca's flukes stuns the herring at the edge, to be picked off one by one.",
+      "moment.dive": "Puffins diving", "mfact.dive": "Puffins fly underwater with their wings, and carry several fish home crosswise in their beaks.",
+      "moment.lunge": "Humpback lunge", "mfact.lunge": "A humpback rises from below with its mouth wide open and takes a huge mouthful of the ball."
     }
   };
   var LANG_KEY = "aurora-puffins-lang";
@@ -1047,11 +1087,12 @@
   function isFullMoon(phase) { return Math.abs(phase - 0.5) * SYNODIC_DAYS < FULL_MOON_DAYS; }
 
   // Preview another night without waiting for it: ?date=YYYY-MM-DD and/or
-  // ?time=HH:MM shift the *sky* clock (it keeps running from there), and
-  // ?visitor=fox|owl|orca brings that visitor by right away. Saves,
+  // ?time=HH:MM shift the *sky* clock (it keeps running from there),
+  // ?visitor=fox|owl|orca brings that visitor by right away, and
+  // ?event=baitball starts a bait ball (E5). Saves,
   // cooldowns and daily caps always use the real clock.
   function parseSkyPreview(search, now) {
-    var out = { offsetMs: 0, visitor: null };
+    var out = { offsetMs: 0, visitor: null, event: null };
     var q;
     try { q = new URLSearchParams(search || ""); } catch (e) { return out; }
     var target = new Date(now.getTime()), changed = false;
@@ -1068,6 +1109,7 @@
     if (tm && +tm[1] < 24 && +tm[2] < 60) { target.setHours(+tm[1], +tm[2], 0, 0); changed = true; }
     if (changed) out.offsetMs = target.getTime() - now.getTime();
     if (/^(fox|owl|orca)$/.test(q.get("visitor") || "")) out.visitor = q.get("visitor");
+    if (q.get("event") === "baitball") out.event = "baitball"; // E5
     return out;
   }
   // ---- end sky calendar ----
@@ -1443,7 +1485,9 @@
     uWind: { value: 0.12 },
     uColorDeep: { value: new THREE.Color("#0B2A3B") },
     uColorShallow: { value: new THREE.Color("#1E5B72") },
-    uDim: { value: 1.0 }
+    uDim: { value: 1.0 },
+    uCam: { value: new THREE.Vector3() },  // E5: where the diving camera is...
+    uWater: { value: new THREE.Color() }   // ...and the colour of the water around it
   };
   var oceanMat = new THREE.ShaderMaterial({
     uniforms: oceanUniforms,
@@ -1468,6 +1512,8 @@
       "uniform vec3 uColorDeep;",
       "uniform vec3 uColorShallow;",
       "uniform float uDim;",
+      "uniform vec3 uCam;",
+      "uniform vec3 uWater;",
       "varying float vWave;",
       "varying vec2 vXZ;",
       "void main(){",
@@ -1475,6 +1521,15 @@
       "  vec3 col = mix(uColorShallow, uColorDeep, d);",
       "  col += vWave * 0.03;",
       "  float edgeF = smoothstep(" + EDGE_FADE_START.toFixed(1) + ", " + EDGE_FADE_END.toFixed(1) + ", length(vXZ));",
+      // E5: seen from below (only ever while diving) the surface is a bright, rippling ceiling
+      "  if (!gl_FrontFacing) {",
+      "    float rip = sin(vXZ.x * 0.9 + vWave * 3.0) * sin(vXZ.y * 0.8 - vWave * 2.0);",
+      "    vec3 under = mix(vec3(0.07, 0.34, 0.40), vec3(0.55, 0.85, 0.88), 0.22 + 0.4 * rip * rip) * uDim;",
+      // further off, the surface melts into the water instead of ending in a hard line
+      "    float far = smoothstep(5.0, 32.0, length(vec3(vXZ.x - uCam.x, -0.16 - uCam.y, vXZ.y - uCam.z)));",
+      "    gl_FragColor = vec4(mix(under, uWater, far), 1.0);",
+      "    return;",
+      "  }",
       "  gl_FragColor = vec4(col * uDim, 1.0 - edgeF);",
       "}"
     ].join("\n")
@@ -2204,6 +2259,8 @@
   };
   // the one behaviour each kind only shows someone who watches it quietly
   var QUIET_BEHAVIOR = { fox: "curl", owl: "doze", orca: "spyhop" };
+  // E5: the bait ball's moments (two of them only show to someone under the water)
+  var BAIT_MOMENTS = ["ball", "slap", "dive", "lunge"];
   // the regulars, each with a mark to recognise it by
   var VISITOR_INDIVIDUALS = {
     fox: [{ id: "fox-notch", coat: "blue", notch: true }, { id: "fox-whitetip", coat: "blue", whiteTip: true }, { id: "fox-white", coat: "white" }],
@@ -2233,7 +2290,8 @@
     return w;
   }
   function emptyNotes() {
-    var n = { version: NOTES_VERSION, kinds: {}, individuals: {}, lastOpened: 0 };
+    var n = { version: NOTES_VERSION, kinds: {}, individuals: {}, lastOpened: 0, baitball: { seen: 0, lastAt: 0, moments: {} } };
+    BAIT_MOMENTS.forEach(function (m) { n.baitball.moments[m] = 0; });
     NOTE_KINDS.forEach(function (k) {
       var kind = { visits: 0, behaviors: {}, times: {}, winds: {} };
       NOTE_BEHAVIORS[k].forEach(function (b) { kind.behaviors[b] = 0; });
@@ -2271,6 +2329,11 @@
       d.lastAt = noteStamp(s.lastAt);
       d.customName = s.customName == null ? null : cleanName(s.customName);
     });
+    var rb = raw.baitball && typeof raw.baitball === "object" ? raw.baitball : {}; // E4 notes simply have none yet
+    var rm = rb.moments && typeof rb.moments === "object" ? rb.moments : {};
+    n.baitball.seen = noteCount(rb.seen);
+    n.baitball.lastAt = noteStamp(rb.lastAt);
+    BAIT_MOMENTS.forEach(function (m) { n.baitball.moments[m] = noteStamp(rm[m]); });
     n.lastOpened = noteStamp(raw.lastOpened);
     return n;
   }
@@ -2984,6 +3047,10 @@
           p.bob.position.y = Math.abs(Math.sin(elapsed * gait)) * (yth === 0 ? 0.02 : 0.025);
           wingFlap = p.scurry ? Math.sin(elapsed * 20) * (yth === 0 ? 0.45 : 0.7) : Math.sin(elapsed * 6) * 0.08;
         }
+      } else if (p.state === "fish") {
+        var trip = puffinFishingStep(p, dt, elapsed); // E5: out to the bait ball and back
+        wingFlap = trip.wing;
+        headX += trip.headX;
       } else if (p.state === "fly") {
         p.flightT += dt;
         var fp = Math.min(p.flightT / p.flightDuration, 1);
@@ -3030,7 +3097,7 @@
       p.headPivot.rotation.z = headZ;
       wingFlap *= (1 - p.sleepAmt * (p.stirT > 0 ? 0.6 : 1));
       // practice-flight roll + timid shiver; normal flying owns root roll itself
-      if (p.state !== "fly") {
+      if (p.state !== "fly" && p.state !== "fish") {
         p.root.rotation.z = p.practiceRoll + (p.startle > 0.01 ? Math.sin(elapsed * 42) * 0.07 * p.startle : 0);
       }
 
@@ -3042,7 +3109,7 @@
   function triggerSpin(index) {
     var p = puffins[index];
     // growth practice and escaping on foot take priority over a playful backflip
-    if (!p || p.state === "spin" || p.state === "fly" || p.state === "practice" || p.fleeing) return;
+    if (!p || p.state === "spin" || p.state === "fly" || p.state === "practice" || p.state === "fish" || p.fleeing) return;
     var wasAsleep = p.state === "sleep";
     p.state = "spin";
     p.spinT = 0;
@@ -3831,6 +3898,7 @@
     var tries = [0, 0.35, -0.35, 0.7, -0.7, 1.1, -1.1, 1.6, -1.6];
     for (var i = 0; i < puffins.length; i++) {
       var p = puffins[i];
+      if (p.state === "fish") continue; // out at sea, nowhere near it
       var dx = p.root.position.x - VOLCANO.x, dz = p.root.position.z - VOLCANO.z;
       var d = Math.sqrt(dx * dx + dz * dz);
       var fleeR = FLEE_RADIUS * persona(p).flee; // timid ones bolt from further away
@@ -5023,7 +5091,6 @@
               // from far off, a tall plume of spray is the first sign of a pod
               var bh = root.localToWorld(m.b.blowholeLocal.clone());
               spawnBurst(bh, far ? 14 : 10, "#F4FAFC", far ? 2.2 : 1.0, far ? 3.8 : 2.2, 0.3, far ? 2.2 : 1);
-              playSfx("spout", bh, false);
             }
           }
           m.up = liftK > 0.55; m.under = false;
@@ -5175,6 +5242,7 @@
       }
       return;
     }
+    if (bait) return; // E5: no visitors while a bait ball is on
     visitorTimer -= dt;
     if (visitorTimer > 0) return;
     // not in the middle of an eruption: there's enough going on
@@ -5184,6 +5252,797 @@
     if (!visitor) { visitorTimer = VISITOR_CFG.RETRY; return; } // nowhere good right now; a preview keeps its kind
     skyPreview.visitor = null;
     lastVisitorKind = kind;
+  }
+
+  // ===============================================================
+  // 9g. E5 — the herring bait ball. Now and then, out at sea, a pod of
+  //     orcas herds a shoal of herring into a tight spinning ball and the
+  //     neighbourhood comes to feed: the orcas circle it and tail-slap it,
+  //     gulls wheel overhead, puffins plunge in after fish, and at the
+  //     climax a humpback lunges straight up through the middle. Watch from
+  //     above, or dive under the surface and watch it from inside the water.
+  //     (Modelled on the "carousel feeding" seen off Iceland and Norway.)
+  // ===============================================================
+  var BAIT_CFG = {
+    FIRST_AFTER: [150, 330], // s the page has been open before the first one can happen
+    GAP: [720, 1200],        // s between bait balls (12–20 min)
+    RETRY: 30,               // not right now (a visitor, an eruption): look again later
+    FISH: 1400,
+    GATHER: 12, HERD: 40, FEED: 84, END: 100, // s: the ball forms, tightens, is fed on, scatters
+    LUNGE_AT: 64,
+    PUFFINS: 4,              // at most this many puffins go fishing...
+    PUFFIN_REACH: 70,        // ...and only ones within this far of the ball
+    GULLS: 8
+  };
+  var BAIT_UNDERWATER_ONLY = { ball: true, dive: true };
+  var bait = null;
+  var baitTimer = skyPreview.event === "baitball" ? 2.5 : randIn(BAIT_CFG.FIRST_AFTER);
+
+  // a little herring: a slim silver body with a darker back, a forked tail, a
+  // dorsal fin and two dark eyes, merged into one shape (with its colours baked
+  // in) so 1,400 of them still draw in one go. Nose along +z, about 0.27 long.
+  function herringGeometry() {
+    var parts = [];
+    function part(geo, colorOf) { parts.push({ g: geo.index ? geo.toNonIndexed() : geo, colorOf: colorOf }); }
+    // (the back has to be this dark to still read as dark under the bright light from above)
+    var back = new THREE.Color("#06121B"), belly = new THREE.Color("#D6E0E7"), fin = new THREE.Color("#2A3D4A"),
+      eye = new THREE.Color("#0E1114"), tmp = new THREE.Color();
+    var body = new THREE.SphereGeometry(0.05, 8, 6);
+    body.scale(0.45, 0.8, 2.2);
+    part(body, function (x, y) { return tmp.copy(belly).lerp(back, THREE.MathUtils.smoothstep(y, -0.008, 0.024)); });
+    [-1, 1].forEach(function (s) { // the two blades of a forked tail, back and up / back and down
+      var blade = new THREE.ConeGeometry(0.018, 0.07, 3);
+      blade.scale(0.25, 1, 1);
+      blade.rotateX(-Math.PI / 2 + s * 0.55);
+      blade.translate(0, s * 0.017, -0.13);
+      part(blade, function () { return fin; });
+    });
+    var dorsal = new THREE.ConeGeometry(0.014, 0.04, 3);
+    dorsal.scale(0.2, 1, 1.4);
+    dorsal.translate(0, 0.045, 0);
+    part(dorsal, function () { return fin; });
+    [-1, 1].forEach(function (s) {
+      var e = new THREE.IcosahedronGeometry(0.0115, 0);
+      e.translate(s * 0.02, 0.01, 0.075);
+      part(e, function () { return eye; });
+    });
+    var count = parts.reduce(function (n, q) { return n + q.g.attributes.position.count; }, 0);
+    var pos = new Float32Array(count * 3), col = new Float32Array(count * 3), o = 0;
+    parts.forEach(function (q) {
+      var a = q.g.attributes.position;
+      for (var i = 0; i < a.count; i++, o++) {
+        var x = a.getX(i), y = a.getY(i), z = a.getZ(i), c = q.colorOf(x, y, z);
+        pos[o * 3] = x; pos[o * 3 + 1] = y; pos[o * 3 + 2] = z;
+        col[o * 3] = c.r; col[o * 3 + 1] = c.g; col[o * 3 + 2] = c.b;
+      }
+    });
+    var g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    g.computeVertexNormals();
+    return g;
+  }
+  var herringGeo = herringGeometry();
+  var herringMat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, metalness: 0.3, roughness: 0.45 });
+  var _hq = new THREE.Quaternion(), _hroll = new THREE.Quaternion(), _hv = new THREE.Vector3(), _hp = new THREE.Vector3(),
+    _hs = new THREE.Vector3(), _hm = new THREE.Matrix4(), _hz = new THREE.Vector3(0, 0, 1), _hy = new THREE.Vector3(0, 1, 0);
+
+  // a moment goes into the notes the first time it's seen; two of them only show underwater
+  function baitWitness(moment, pos, range) {
+    var seen = notes.baitball.moments;
+    if (seen[moment] || (BAIT_UNDERWATER_ONLY[moment] && !dive.on) || !seenOnScreen(pos, range)) return;
+    seen[moment] = Date.now();
+    saveNotes();
+    refreshNotesUI();
+  }
+
+  function buildGull() {
+    var root = new THREE.Group(), body = new THREE.Group();
+    root.add(body);
+    var white = mat("#F4F5F2"), grey = mat("#A9B3BC"), black = mat("#2A2D33"), beakM = mat("#E8C24A");
+    visitorPart(body, new THREE.IcosahedronGeometry(0.11, 0), white, 0, 0, 0).scale.set(0.9, 0.8, 2.1);
+    visitorPart(body, new THREE.IcosahedronGeometry(0.07, 0), white, 0, 0.04, 0.2); // head
+    visitorPart(body, new THREE.ConeGeometry(0.018, 0.08, 4), beakM, 0, 0.035, 0.29).rotation.x = Math.PI / 2;
+    visitorPart(body, new THREE.BoxGeometry(0.12, 0.015, 0.12), grey, 0, 0.01, -0.24); // tail
+    var wings = [-1, 1].map(function (s) {
+      var pv = new THREE.Group();
+      pv.position.set(s * 0.07, 0.03, 0.02);
+      body.add(pv);
+      visitorPart(pv, new THREE.BoxGeometry(0.42, 0.014, 0.15), grey, s * 0.21, 0, 0);
+      visitorPart(pv, new THREE.BoxGeometry(0.1, 0.016, 0.1), black, s * 0.4, 0.001, -0.01); // black wingtip
+      pv.userData.side = s;
+      return pv;
+    });
+    root.scale.setScalar(1.6);
+    return { root: root, body: body, wings: wings };
+  }
+
+  // the ball sits out at sea in front of whatever the player is looking at, clear of the whales
+  function baitSpot() {
+    var tz = Math.min(controls.target.z, 0);
+    for (var k = 0; k < 8; k++) {
+      var cx = THREE.MathUtils.clamp(controls.target.x + (Math.random() - 0.5) * 30, -60, 60);
+      var cz = THREE.MathUtils.clamp(tz - 30 - Math.random() * 12, PLAY_OCEAN_FAR_Z + 24, -24);
+      var clear = !whales.some(function (w) { return w.state !== "hidden" && Math.hypot(w.pos.x - cx, w.pos.y - cz) < 16; });
+      if (clear) return new THREE.Vector3(cx, -6, cz);
+    }
+    return null;
+  }
+  function startBait() {
+    var C = baitSpot();
+    if (!C) return null;
+    var N = BAIT_CFG.FISH, ind = pickIndividual("orca");
+    var b = {
+      t: 0, C: C, R: 14, ind: ind, n: N, alive: N, spin: Math.random() < 0.5 ? 1 : -1,
+      pos: new Float32Array(N * 3), vel: new Float32Array(N * 3), prefR: new Float32Array(N), ph: new Float32Array(N),
+      stun: new Float32Array(N), live: new Uint8Array(N),
+      mesh: new THREE.InstancedMesh(herringGeo, herringMat, N),
+      orcas: [], gulls: [], lunge: null, slapT: 3, nextPuffinAt: BAIT_CFG.HERD + 2, puffinsSent: 0,
+      sparkleT: 0, roots: []
+    };
+    for (var i = 0; i < N; i++) {
+      // a loose cloud to begin with; each fish keeps its own place in the ball later
+      var a = Math.random() * Math.PI * 2, r = 9 + Math.random() * 8, y = -3 - Math.random() * 6;
+      b.pos[i * 3] = C.x + Math.cos(a) * r; b.pos[i * 3 + 1] = y; b.pos[i * 3 + 2] = C.z + Math.sin(a) * r;
+      b.vel[i * 3] = (Math.random() - 0.5); b.vel[i * 3 + 2] = (Math.random() - 0.5);
+      b.prefR[i] = 0.25 + 0.75 * Math.cbrt(Math.random());
+      b.ph[i] = Math.random() * Math.PI * 2;
+      b.live[i] = 1;
+    }
+    b.mesh.frustumCulled = false; // instances spread far beyond the base geometry's bounds
+    scene.add(b.mesh);
+    b.roots.push(b.mesh);
+    // the orcas: one of the regular pods, swimming in from a distance
+    for (var j = 0; j < ind.size; j++) {
+      var isCalf = ind.size >= 4 && j === ind.size - 1;
+      var ob = buildOrca(j === 0, ind.fin);
+      var sc = (isCalf ? 0.55 : j === 0 ? 1 : 0.85) * ORCA_MODEL_SCALE;
+      ob.root.scale.setScalar(sc);
+      var a0 = j / ind.size * Math.PI * 2 + Math.random() * 0.4;
+      ob.root.position.set(C.x + Math.cos(a0) * (36 + j * 3), -3, C.z + Math.sin(a0) * (36 + j * 3));
+      scene.add(ob.root);
+      b.roots.push(ob.root);
+      b.orcas.push({ b: ob, sc: sc, ang: a0, radOff: 2 + Math.random() * 1.4, depthOff: -0.5 + Math.random() * 2,
+        breatheT: 3 + Math.random() * 8, breathe: null, spouted: false, slap: null, slapTail: null, isCalf: isCalf });
+    }
+    // gulls: from the shore, they're the first sign something is happening out there
+    for (var g = 0; g < BAIT_CFG.GULLS; g++) {
+      var gb = buildGull(), ga = Math.random() * Math.PI * 2;
+      gb.root.position.set(C.x + Math.cos(ga) * 45, 12 + Math.random() * 6, C.z + Math.sin(ga) * 45);
+      scene.add(gb.root);
+      b.roots.push(gb.root);
+      b.gulls.push({ b: gb, ang: ga + Math.random(), rad: 5 + Math.random() * 6, h: 4 + Math.random() * 5,
+        w: (0.45 + Math.random() * 0.4) * (Math.random() < 0.5 ? 1 : -1), flapT: Math.random() * 6, dip: null });
+    }
+    // the water over the ball turns dark and "boils"
+    var patch = new THREE.Mesh(new THREE.CircleGeometry(1, 32),
+      new THREE.MeshBasicMaterial({ color: "#0B2633", transparent: true, opacity: 0, depthWrite: false }));
+    patch.rotation.x = -Math.PI / 2;
+    patch.renderOrder = 1;
+    scene.add(patch);
+    b.patch = patch;
+    b.roots.push(patch);
+    // a sighting for the notes, and a visit for that pod
+    notes.baitball.seen++;
+    notes.baitball.lastAt = Date.now();
+    noteVisit({ kind: "orca", ind: ind });
+    showToast(t("bait.start", { pod: visitorName(ind.id) }), 4200);
+    return b;
+  }
+
+  function eatHerring(b, i) {
+    if (!b.live[i]) return;
+    b.live[i] = 0;
+    b.alive--;
+    b.mesh.setMatrixAt(i, _pZero);
+  }
+  // predators as a flat list: x, y, z, radius, strength
+  function baitPredators(b) {
+    var out = [];
+    b.orcas.forEach(function (o) {
+      var hp = o.b.root.localToWorld(_hv.set(0, 0, 0.9));
+      out.push(hp.x, hp.y, hp.z, 2.2 * o.sc / ORCA_MODEL_SCALE, 6);
+    });
+    puffins.forEach(function (p) {
+      if (p.state === "fish" && p.fishing.phase === "swim") out.push(p.root.position.x, p.root.position.y, p.root.position.z, 0.7, 2);
+    });
+    if (b.lunge && b.lunge.t < 2.4) {
+      var lw = b.lunge.b.root.position;
+      out.push(lw.x, lw.y + 5, lw.z, 3.4, 10);
+    }
+    return out;
+  }
+  function updateHerring(b, dt, elapsed, preds) {
+    var N = b.n, P = b.pos, V = b.vel, C = b.C, R = b.R;
+    var top = oceanSurfaceY(C.x, C.z, elapsed, currentWind01) - 0.3;
+    var dispersing = b.t > BAIT_CFG.FEED;
+    var fade = dispersing ? Math.max(0, 1 - (b.t - BAIT_CFG.FEED) / (BAIT_CFG.END - BAIT_CFG.FEED)) : Math.min(1, b.t / 3);
+    var spread = dispersing ? 1 + (b.t - BAIT_CFG.FEED) * 0.35 : 1;
+    var k = Math.min(1, dt * 2.6);
+    for (var i = 0; i < N; i++) {
+      if (!b.live[i]) continue;
+      var j = i * 3, px = P[j], py = P[j + 1], pz = P[j + 2], vx = V[j], vy = V[j + 1], vz = V[j + 2];
+      var dx = px - C.x, dy = py - C.y, dz = pz - C.z, ph = b.ph[i];
+      var rh = Math.sqrt(dx * dx + dz * dz) + 1e-4;
+      // the carousel: the whole ball swims round one vertical axis...
+      var sp = (1.5 + 0.5 * Math.sin(ph * 7.1)) * (dispersing ? 0.6 : 1);
+      var wx = -dz / rh * sp * b.spin, wz = dx / rh * sp * b.spin, wy = Math.sin(elapsed * 1.1 + ph * 5) * 0.25;
+      // ...each fish on its own shell of it (a touch flatter top to bottom)
+      var r3 = Math.sqrt(dx * dx + dy * dy * 1.15 + dz * dz) + 1e-4;
+      var pull = (b.prefR[i] * R * spread - r3) * (dispersing ? 0.8 : 2.0);
+      wx += dx / r3 * pull; wy += dy * 1.15 / r3 * pull; wz += dz / r3 * pull;
+      var st = b.stun[i];
+      if (st > 0) { b.stun[i] = st - dt; wx *= 0.15; wz *= 0.15; wy = 0.15; } // stunned: barely swimming
+      vx += (wx - vx) * k; vy += (wy - vy) * k; vz += (wz - vz) * k;
+      // and out of every predator's way
+      if (st <= 0) {
+        for (var q = 0; q < preds.length; q += 5) {
+          var ex = px - preds[q], ey = py - preds[q + 1], ez = pz - preds[q + 2], rr = preds[q + 3];
+          var d2 = ex * ex + ey * ey + ez * ez;
+          if (d2 < rr * rr) {
+            var d = Math.sqrt(d2) + 1e-4, push = (rr - d) / rr * preds[q + 4] * dt * 10;
+            vx += ex / d * push; vy += ey / d * push; vz += ez / d * push;
+          }
+        }
+      }
+      var spd = Math.sqrt(vx * vx + vy * vy + vz * vz);
+      if (spd > 4.5) { vx *= 4.5 / spd; vy *= 4.5 / spd; vz *= 4.5 / spd; }
+      px += vx * dt; py += vy * dt; pz += vz * dt;
+      // never out of the water: from above, all you see of it is the sea boiling
+      if (py > top) { py = top; if (vy > 0) vy *= -0.3; }
+      if (py < -16) py = -16;
+      P[j] = px; P[j + 1] = py; P[j + 2] = pz; V[j] = vx; V[j + 1] = vy; V[j + 2] = vz;
+      _hv.set(vx, vy, vz);
+      var len = _hv.length();
+      if (len > 1e-3) {
+        _hq.setFromUnitVectors(_hz, _hv.multiplyScalar(1 / len)); // nose first...
+        _hq.multiply(_hroll.setFromAxisAngle(_hy, Math.sin(elapsed * 11 + ph * 9) * 0.16)); // ...with a little swimming wiggle
+      }
+      if (st > 0) _hq.multiply(_hroll.setFromAxisAngle(_hz, 1.2 + Math.sin(elapsed * 20 + ph) * 0.5)); // on its side, twitching
+      var s = fade * (0.85 + 0.3 * ((ph * 13.7) % 1));
+      b.mesh.setMatrixAt(i, _hm.compose(_hp.set(px, py, pz), _hq, _hs.set(s, s, s)));
+    }
+    b.mesh.instanceMatrix.needsUpdate = true;
+  }
+
+  function updateBaitOrcas(b, dt, elapsed) {
+    var feeding = b.t > BAIT_CFG.HERD && b.t < BAIT_CFG.FEED;
+    // a tail slap every few seconds while they feed
+    if (feeding) {
+      b.slapT -= dt;
+      if (b.slapT <= 0 && !b.orcas.some(function (o) { return o.slap; })) {
+        var free = b.orcas.filter(function (o) { return o.breathe == null && !o.isCalf; });
+        if (free.length) free[Math.floor(Math.random() * free.length)].slap = { t: 0, hit: false };
+        b.slapT = 3.5 + Math.random() * 2;
+      }
+    }
+    b.orcas.forEach(function (o, i) {
+      var root = o.b.root, surf = oceanSurfaceY(root.position.x, root.position.z, elapsed, currentWind01);
+      var tx, ty, tz, speed = 3.2;
+      o.slapTail = null;
+      if (b.t > BAIT_CFG.FEED) {
+        // done: off they go, and down
+        tx = b.C.x + Math.cos(o.ang) * 70; tz = b.C.z + Math.sin(o.ang) * 70; ty = -7; speed = 4.5;
+      } else if (o.slap) {
+        var s = o.slap;
+        s.t += dt;
+        if (s.t < 0.9) { // dash in at the edge of the ball
+          tx = b.C.x + Math.cos(o.ang) * b.R * 0.95; tz = b.C.z + Math.sin(o.ang) * b.R * 0.95; ty = b.C.y; speed = 5.5;
+        } else if (s.t < 1.2) { // the slap: a hard flick of the flukes into the fish
+          tx = root.position.x; ty = root.position.y; tz = root.position.z;
+          o.slapTail = -0.9 + 1.9 * Math.min(1, (s.t - 0.9) / 0.25);
+          if (!s.hit && s.t > 1.05) {
+            s.hit = true;
+            var tp = o.b.tailPivot.getWorldPosition(new THREE.Vector3());
+            for (var f = 0; f < b.n; f++) {
+              if (!b.live[f]) continue;
+              var ddx = b.pos[f * 3] - tp.x, ddy = b.pos[f * 3 + 1] - tp.y, ddz = b.pos[f * 3 + 2] - tp.z;
+              if (ddx * ddx + ddy * ddy + ddz * ddz < 6.8) b.stun[f] = 2.2 + Math.random();
+            }
+            spawnBurst(tp, 14, "#E8F6FA", 0.8, 1.8, 0.6, 0.7); // a cloud of bubbles
+            if (tp.y > surf - 1.3) spawnBurst(new THREE.Vector3(tp.x, surf, tp.z), 12, "#EAF6FB", 1.0, 2.4, 0.6);
+            baitWitness("slap", tp, 90);
+          }
+        } else if (s.t < 2.4) { // and through the stunned fish, eating
+          tx = b.C.x; ty = b.C.y; tz = b.C.z; speed = 3.6;
+          var hp = root.localToWorld(new THREE.Vector3(0, 0, 0.9));
+          for (var e = 0; e < b.n; e++) {
+            if (!b.live[e] || b.stun[e] <= 0) continue;
+            var fx = b.pos[e * 3] - hp.x, fy = b.pos[e * 3 + 1] - hp.y, fz = b.pos[e * 3 + 2] - hp.z;
+            if (fx * fx + fy * fy + fz * fz < 2.0) eatHerring(b, e);
+          }
+        } else {
+          o.slap = null;
+          tx = root.position.x; ty = root.position.y; tz = root.position.z;
+        }
+      } else {
+        // circling the ball, keeping it tight
+        o.ang += dt * 0.42 * b.spin * (b.t < BAIT_CFG.GATHER ? 0.3 : 1);
+        var rad = b.R + o.radOff;
+        tx = b.C.x + Math.cos(o.ang) * rad; tz = b.C.z + Math.sin(o.ang) * rad;
+        ty = b.C.y + o.depthOff + Math.sin(elapsed * 0.6 + i) * 0.5;
+        // coming up to breathe now and then (the one sound they make)
+        o.breatheT -= dt;
+        if (o.breatheT <= 0 && o.breathe == null) { o.breathe = 0; o.spouted = false; o.breatheT = 10 + Math.random() * 6; }
+        if (o.breathe != null) {
+          o.breathe += dt;
+          var kb = o.breathe / 2.2;
+          if (kb >= 1) o.breathe = null;
+          else {
+            ty = THREE.MathUtils.lerp(ty, surf - 0.12 * o.sc, Math.sin(Math.PI * kb));
+            if (!o.spouted && kb > 0.5) {
+              o.spouted = true;
+              var bh = root.localToWorld(o.b.blowholeLocal.clone());
+              spawnBurst(bh, 10, "#F4FAFC", 1.4, 2.8, 0.3, 1.4);
+            }
+          }
+        }
+      }
+      // swim toward the goal, facing the way it's going
+      var dx = tx - root.position.x, dy = ty - root.position.y, dz = tz - root.position.z, d = Math.hypot(dx, dy, dz);
+      if (d > 1e-3) {
+        var step = Math.min(d, speed * dt);
+        root.position.x += dx / d * step; root.position.y += dy / d * step; root.position.z += dz / d * step;
+        if (Math.hypot(dx, dz) > 0.05) {
+          var da = Math.atan2(dx, dz) - root.rotation.y;
+          root.rotation.y += Math.atan2(Math.sin(da), Math.cos(da)) * Math.min(1, dt * 3);
+        }
+        o.b.bob.rotation.x = easeTo(o.b.bob.rotation.x, -Math.atan2(dy, Math.hypot(dx, dz) + 0.3) * 0.8, 5, dt);
+      }
+      o.b.tailPivot.rotation.x = o.slapTail != null ? o.slapTail : Math.sin(elapsed * 3.2 + i) * 0.25;
+      o.b.fins[0].rotation.x = Math.sin(elapsed * 1.7 + i) * 0.15;
+      o.b.fins[1].rotation.x = -o.b.fins[0].rotation.x;
+    });
+  }
+
+  // the humpback: straight up from below, mouth first, through the middle of the ball
+  function updateBaitWhale(b, dt, elapsed) {
+    if (!b.lunge && b.t >= BAIT_CFG.LUNGE_AT && b.t < BAIT_CFG.FEED) {
+      var w = buildWhale();
+      w.root.scale.setScalar(WHALE_MODEL_SCALE);
+      w.root.rotation.order = "YXZ";
+      w.root.rotation.y = Math.random() * Math.PI * 2;
+      scene.add(w.root);
+      b.roots.push(w.root);
+      b.lunge = { b: w, t: 0, splashed: false };
+    }
+    var L = b.lunge;
+    if (!L || L.done) return;
+    var root = L.b.root, surf = oceanSurfaceY(b.C.x, b.C.z, elapsed, currentWind01);
+    var headUp = 1.24 * WHALE_MODEL_SCALE; // nose to the model's origin, standing on its tail
+    L.t += dt;
+    if (L.t < 2.4) {
+      var e = 1 - Math.pow(1 - L.t / 2.4, 2);
+      root.position.set(b.C.x, THREE.MathUtils.lerp(b.C.y - 4 - headUp, surf + 2 - headUp, e), b.C.z);
+      root.rotation.x = -Math.PI / 2 * 0.95; // nose to the sky
+      var headY = root.position.y + headUp;
+      for (var f = 0; f < b.n; f++) { // everything in the column it rises through goes in
+        if (!b.live[f]) continue;
+        var fx = b.pos[f * 3] - b.C.x, fz = b.pos[f * 3 + 2] - b.C.z;
+        if (fx * fx + fz * fz < 6.5 && b.pos[f * 3 + 1] < headY && b.pos[f * 3 + 1] > headY - 3) eatHerring(b, f);
+      }
+      // from the shore it counts at the surface; from under the water, where the head comes up through the ball
+      if (L.t > 0.9) baitWitness("lunge", new THREE.Vector3(b.C.x, dive.on ? Math.min(headY, surf - 0.5) : Math.max(headY, surf), b.C.z), 140);
+    } else if (L.t < 5.2) {
+      if (!L.splashed) {
+        L.splashed = true;
+        spawnBurst(new THREE.Vector3(b.C.x, surf, b.C.z), 40, "#EAF6FB", 2.0, 5.0, 1.6, 1.6);
+      }
+      var kf = (L.t - 2.4) / 2.8; // topple over sideways and sink back down
+      root.rotation.x = -Math.PI / 2 * 0.95 * (1 - kf);
+      root.rotation.z = 1.2 * Math.sin(Math.PI / 2 * kf);
+      root.position.y = THREE.MathUtils.lerp(surf + 2 - headUp, -16, kf * kf);
+    } else {
+      L.done = true;
+      root.visible = false;
+    }
+  }
+
+  function updateBaitGulls(b, dt, elapsed) {
+    var leaving = b.t > BAIT_CFG.FEED + 4;
+    b.gulls.forEach(function (g, i) {
+      var root = g.b.root, tx, ty, tz;
+      g.flapT += dt;
+      if (leaving) {
+        tx = b.C.x + Math.cos(g.ang) * 80; tz = b.C.z + Math.sin(g.ang) * 80; ty = 16;
+      } else {
+        g.ang += g.w * dt;
+        tx = b.C.x + Math.cos(g.ang) * g.rad; tz = b.C.z + Math.sin(g.ang) * g.rad;
+        ty = g.h + Math.sin(elapsed * 0.7 + i) * 0.8;
+        // now and then one drops to the water for a fish
+        if (b.t > BAIT_CFG.HERD && !g.dip && Math.random() < dt * 0.06) g.dip = { t: 0 };
+        if (g.dip) {
+          g.dip.t += dt;
+          var kd = g.dip.t / 1.6;
+          ty = THREE.MathUtils.lerp(ty, 0.2, Math.sin(Math.PI * Math.min(1, kd)));
+          if (!g.dip.splashed && kd > 0.48) { g.dip.splashed = true; spawnBurst(new THREE.Vector3(root.position.x, 0, root.position.z), 6, "#EAF6FB", 0.6, 1.4, 0.4); }
+          if (kd >= 1) g.dip = null;
+        }
+      }
+      var dx = tx - root.position.x, dy = ty - root.position.y, dz = tz - root.position.z, d = Math.hypot(dx, dy, dz);
+      var step = Math.min(d, (leaving ? 9 : 7) * dt);
+      if (d > 1e-3) { root.position.x += dx / d * step; root.position.y += dy / d * step; root.position.z += dz / d * step; }
+      faceToward(root, dx, dz, dt, 4);
+      g.b.body.rotation.z = easeTo(g.b.body.rotation.z, -0.4 * Math.sign(g.w), 3, dt); // banking into the turn
+      // a few strong beats, then a long glide
+      var beat = (g.flapT % 5) < 1.6 ? Math.sin(g.flapT * 8) * 0.6 : 0.12;
+      g.b.wings.forEach(function (pv) { pv.rotation.z = pv.userData.side < 0 ? -beat : beat; });
+    });
+  }
+
+  // ---- puffins going fishing: out to the ball, a plunge, a chase underwater,
+  //      and home with a beakful of fish ----
+  function puffinsFishingCount() {
+    var n = 0;
+    puffins.forEach(function (p) { if (p.state === "fish") n++; });
+    return n;
+  }
+  function sendPuffinFishing(b) {
+    var C = b.C;
+    var ok = puffins.filter(function (p) {
+      return youth(p) === 2 && (p.state === "idle" || (p.state === "walk" && !p.foodRef && !p.fleeing && !p.visiting)) &&
+        Math.hypot(p.root.position.x - C.x, p.root.position.z - C.z) < BAIT_CFG.PUFFIN_REACH;
+    });
+    if (!ok.length) return false;
+    var p = ok[Math.floor(Math.random() * ok.length)];
+    var a = Math.random() * Math.PI * 2, r = Math.random() * b.R * 0.7;
+    var from = new THREE.Vector2(p.root.position.x, p.root.position.z);
+    var sea = new THREE.Vector2(C.x + Math.cos(a) * r, C.z + Math.sin(a) * r);
+    var home = isSafeGround(p.home.x, p.home.y, 0.3) ? p.home.clone() : from.clone();
+    var dist = from.distanceTo(sea);
+    p.fishing = {
+      phase: "out", t: 0, from: from, fromY: p.root.position.y, sea: sea, home: home,
+      dur: dist / FLY_SPEED * 1.1, arc: flightArcFor(from, sea), target: -1, caught: null, splashed: false
+    };
+    p.state = "fish";
+    p.visiting = false;
+    p.watchT = 0;
+    p.root.rotation.order = "YXZ"; // yaw, then pitch in its own frame: it dives head-first
+    return true;
+  }
+  // a beakful of herring, crosswise, the way puffins carry them
+  function beakfulOfFish(p) {
+    var g = new THREE.Group(), m = mat("#C9D8E2", { metalness: 0.5, roughness: 0.35 });
+    for (var i = 0; i < 4; i++) {
+      var f = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.012, 0.026), m);
+      f.position.set((i % 2 ? 0.02 : -0.02), -0.012 * i, 0.012 * i);
+      f.rotation.set(0, (Math.random() - 0.5) * 0.4, (i % 2 ? 1 : -1) * 0.35);
+      g.add(f);
+    }
+    g.position.set(0, 0.07, 0.27);
+    p.headPivot.add(g);
+    return g;
+  }
+  function dropBeakful(p) {
+    var f = p.fishing && p.fishing.caught;
+    if (!f) return;
+    p.headPivot.remove(f);
+    f.traverse(function (o) { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+  }
+  // one step of the trip; returns the wing beat and an extra head tilt
+  var _fishOut = { wing: 0, headX: 0 };
+  function puffinFishingStep(p, dt, elapsed) {
+    var f = p.fishing, root = p.root;
+    f.t += dt;
+    _fishOut.wing = 0; _fishOut.headX = 0;
+    var surf;
+    if (f.phase === "out") {
+      var k = Math.min(1, f.t / f.dur);
+      var x = THREE.MathUtils.lerp(f.from.x, f.sea.x, k), z = THREE.MathUtils.lerp(f.from.y, f.sea.y, k);
+      root.position.set(x, THREE.MathUtils.lerp(f.fromY + 0.5, 3, k) + Math.sin(Math.PI * k) * f.arc, z);
+      faceToward(root, f.sea.x - f.from.x, f.sea.y - f.from.y, dt, 10);
+      root.rotation.x = 0;
+      _fishOut.wing = Math.sin(elapsed * 22) * 0.85;
+      if (k >= 1) { f.phase = "plunge"; f.t = 0; }
+    } else if (f.phase === "plunge") {
+      // wings folded back, head-first into the sea
+      var kp = Math.min(1, f.t / 0.45);
+      root.position.y = 3 - 4.6 * kp * kp;
+      root.rotation.x = 2.6 * kp;
+      _fishOut.wing = -0.5;
+      surf = oceanSurfaceY(root.position.x, root.position.z, elapsed, currentWind01);
+      if (!f.splashed && root.position.y < surf) { f.splashed = true; spawnBurst(new THREE.Vector3(root.position.x, surf, root.position.z), 8, "#EAF6FB", 0.8, 1.8, 0.4); }
+      if (kp >= 1) { f.phase = "swim"; f.t = 0; f.splashed = false; }
+    } else if (f.phase === "swim") {
+      // "flying" underwater with its wings, after the fish
+      var b = bait, goal = null;
+      if (b && b.alive > 0) {
+        if (f.target < 0 || !b.live[f.target]) {
+          var best = -1, bd = Infinity;
+          for (var i = 0; i < b.n; i += 7) { // a quick look round for one close by
+            if (!b.live[i]) continue;
+            var ddx = b.pos[i * 3] - root.position.x, ddy = b.pos[i * 3 + 1] - root.position.y, ddz = b.pos[i * 3 + 2] - root.position.z;
+            var dd = ddx * ddx + ddy * ddy + ddz * ddz;
+            if (dd < bd) { bd = dd; best = i; }
+          }
+          f.target = best;
+        }
+        if (f.target >= 0) goal = _hp.set(b.pos[f.target * 3], b.pos[f.target * 3 + 1], b.pos[f.target * 3 + 2]);
+      }
+      if (goal) {
+        var gx = goal.x - root.position.x, gy = goal.y - root.position.y, gz = goal.z - root.position.z, gd = Math.hypot(gx, gy, gz) || 1;
+        var st = Math.min(gd, 3.2 * dt);
+        root.position.x += gx / gd * st; root.position.y += gy / gd * st; root.position.z += gz / gd * st;
+        faceToward(root, gx, gz, dt, 8);
+        root.rotation.x = easeTo(root.rotation.x, Math.atan2(Math.hypot(gx, gz), gy), 8, dt); // along its path
+        // anything within reach of the beak is caught
+        for (var c = 0; c < b.n; c++) {
+          if (!b.live[c]) continue;
+          var cx = b.pos[c * 3] - root.position.x, cy = b.pos[c * 3 + 1] - root.position.y, cz = b.pos[c * 3 + 2] - root.position.z;
+          if (cx * cx + cy * cy + cz * cz < 0.64) { eatHerring(b, c); f.caught = beakfulOfFish(p); break; }
+        }
+        baitWitness("dive", root.position, 30);
+      }
+      _fishOut.wing = Math.sin(elapsed * 14) * 0.9;
+      _fishOut.headX = -0.5;
+      if (f.caught || f.t > 6 || !goal) { f.phase = "up"; f.t = 0; f.upFrom = root.position.y; }
+    } else if (f.phase === "up") {
+      // shoots up and bursts out of the water
+      var ku = Math.min(1, f.t / 0.8);
+      surf = oceanSurfaceY(root.position.x, root.position.z, elapsed, currentWind01);
+      root.position.y = THREE.MathUtils.lerp(f.upFrom, surf + 0.4, ku);
+      root.rotation.x = easeTo(root.rotation.x, 0.3, 8, dt);
+      _fishOut.wing = Math.sin(elapsed * 16) * 0.8;
+      if (ku >= 1) {
+        spawnBurst(new THREE.Vector3(root.position.x, surf, root.position.z), 8, "#EAF6FB", 0.8, 1.8, 0.4);
+        f.phase = "back"; f.t = 0;
+        f.from = new THREE.Vector2(root.position.x, root.position.z);
+        f.fromY = root.position.y;
+        f.arc = flightArcFor(f.from, f.home);
+        f.dur = f.from.distanceTo(f.home) / FLY_SPEED * 1.1;
+      }
+    } else if (f.phase === "back") {
+      var kk = Math.min(1, f.t / f.dur);
+      var bx = THREE.MathUtils.lerp(f.from.x, f.home.x, kk), bz = THREE.MathUtils.lerp(f.from.y, f.home.y, kk);
+      var landY = groundHeight(f.home.x, f.home.y);
+      root.position.set(bx, THREE.MathUtils.lerp(f.fromY, landY, kk) + 0.5 * (1 - kk) + Math.sin(Math.PI * kk) * f.arc, bz);
+      faceToward(root, f.home.x - f.from.x, f.home.y - f.from.y, dt, 10);
+      root.rotation.x = easeTo(root.rotation.x, 0, 6, dt);
+      _fishOut.wing = Math.sin(elapsed * 22) * 0.85;
+      if (kk >= 1) {
+        // home, a beak full of fish for a little while
+        root.position.set(f.home.x, landY, f.home.y);
+        root.rotation.x = 0;
+        root.rotation.order = "XYZ";
+        p.state = "idle";
+        p.idleT = idleFor(p, 2.5, 2);
+        p.fishHoldT = f.caught ? 4 : 0;
+        p.heldFish = f.caught;
+        p.fishing = null;
+      }
+    }
+    return _fishOut;
+  }
+  // after landing it holds on to its catch a few seconds before it's gone
+  function updateHeldFish(dt) {
+    puffins.forEach(function (p) {
+      if (!p.heldFish) return;
+      p.fishHoldT -= dt;
+      if (p.fishHoldT <= 0 || p.state === "sleep" || p.state === "spin") {
+        dropBeakful({ fishing: { caught: p.heldFish }, headPivot: p.headPivot });
+        p.heldFish = null;
+      }
+    });
+  }
+
+  // ---- watching from under the water ----
+  var dive = { on: false, saved: null, busy: false };
+  var DIVE_WATER = { day: new THREE.Color("#0E5162"), night: new THREE.Color("#041A22") };
+  var diveWater = new THREE.Color();
+  var diveFlash = document.getElementById("diveFlash");
+  // shafts of light coming down from the surface, and drifting specks in the water
+  var shaftTex = (function () {
+    var c = document.createElement("canvas");
+    c.width = 16; c.height = 128;
+    var g = c.getContext("2d"), grad = g.createLinearGradient(0, 0, 0, 128);
+    grad.addColorStop(0, "rgba(255,255,255,0.9)");
+    grad.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 16, 128);
+    return new THREE.CanvasTexture(c);
+  })();
+  var shafts = [];
+  for (var shI = 0; shI < 7; shI++) {
+    var sm = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 14), new THREE.MeshBasicMaterial({
+      map: shaftTex, color: "#9FE6E8", transparent: true, opacity: 0.09, blending: THREE.AdditiveBlending,
+      depthWrite: false, side: THREE.DoubleSide, fog: false
+    }));
+    sm.visible = false;
+    sm.userData.a = Math.random() * Math.PI * 2;
+    sm.userData.r = 4 + Math.random() * 8;
+    scene.add(sm);
+    shafts.push(sm);
+  }
+  var SNOW_N = 300;
+  var marineGeo = new THREE.BufferGeometry();
+  marineGeo.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(SNOW_N * 3), 3));
+  var marineSnow = new THREE.Points(marineGeo, new THREE.PointsMaterial({ color: 0xDDEFF2, size: 0.05, transparent: true, opacity: 0.55, depthWrite: false }));
+  marineSnow.visible = false;
+  marineSnow.frustumCulled = false;
+  scene.add(marineSnow);
+  (function () {
+    var a = marineGeo.attributes.position.array;
+    for (var i = 0; i < a.length; i++) a[i] = (Math.random() - 0.5) * 24;
+  })();
+
+  function flash(then) {
+    dive.busy = true;
+    diveFlash.classList.add("on");
+    setTimeout(function () {
+      then();
+      setTimeout(function () { diveFlash.classList.remove("on"); dive.busy = false; }, 60);
+    }, 260);
+  }
+  function enterDive() {
+    if (!bait || dive.on || dive.busy) return;
+    userTookCamera(); // stop any find / follow
+    seaTween = null;
+    flash(function () {
+      if (!bait) return;
+      dive.on = true;
+      dive.saved = { near: scene.fog.near, far: scene.fog.far, bg: scene.background, maxPolar: controls.maxPolarAngle, minDist: controls.minDistance, maxDist: controls.maxDistance };
+      sky.visible = aurora.visible = stars.visible = moonSprite.visible = moonHalo.visible = false;
+      scene.background = diveWater;
+      controls.maxPolarAngle = Math.PI * 0.92;
+      controls.minDistance = 2.5;
+      controls.maxDistance = 30;
+      // in beside the ball, a little below it, looking in
+      var C = bait.C, side = new THREE.Vector3(camera.position.x - C.x, 0, camera.position.z - C.z);
+      if (side.lengthSq() < 1) side.set(0, 0, 1);
+      side.setLength(10);
+      controls.target.set(C.x, C.y + 0.3, C.z);
+      camera.position.set(C.x + side.x, Math.min(-1.2, C.y + 0.8), C.z + side.z);
+      controls.update();
+      shafts.forEach(function (s) { s.visible = true; });
+      marineSnow.visible = true;
+      if (au) au.muffle.frequency.setTargetAtTime(550, au.ctx.currentTime, 0.15); // the world goes muffled
+      refreshSeaBar();
+    });
+  }
+  function exitDive() {
+    if (!dive.on || dive.busy) return;
+    flash(function () {
+      dive.on = false;
+      var s = dive.saved;
+      scene.fog.near = s.near; scene.fog.far = s.far;
+      scene.background = s.bg;
+      controls.maxPolarAngle = s.maxPolar; controls.minDistance = s.minDist; controls.maxDistance = s.maxDist;
+      sky.visible = aurora.visible = stars.visible = moonSprite.visible = moonHalo.visible = true;
+      shafts.forEach(function (sh) { sh.visible = false; });
+      marineSnow.visible = false;
+      if (au) au.muffle.frequency.setTargetAtTime(22000, au.ctx.currentTime, 0.15);
+      // back up above the water, looking at where the ball was
+      var C = controls.target.clone();
+      controls.target.set(C.x, -0.2, C.z);
+      camera.position.set(C.x + 5, 13, C.z + 22);
+      controls.update();
+      refreshSeaBar();
+    });
+  }
+  // underwater the camera stays under the surface and near the ball
+  function clampDiveCamera() {
+    if (camera.position.y > -0.7) camera.position.y = -0.7;
+    if (camera.position.y < -15) camera.position.y = -15;
+    if (controls.target.y > -0.5) controls.target.y = -0.5;
+    if (bait) {
+      var C = bait.C, dx = controls.target.x - C.x, dz = controls.target.z - C.z, d = Math.hypot(dx, dz);
+      if (d > 16) { controls.target.x = C.x + dx / d * 16; controls.target.z = C.z + dz / d * 16; }
+    }
+  }
+  function updateDiveView(dt, elapsed) {
+    if (!dive.on) return;
+    diveWater.copy(DIVE_WATER.day).lerp(DIVE_WATER.night, dayNight.current);
+    scene.fog.color.copy(diveWater);
+    oceanUniforms.uCam.value.copy(camera.position);
+    oceanUniforms.uWater.value.copy(diveWater);
+    scene.fog.near = 2;
+    scene.fog.far = 34;
+    var C = bait ? bait.C : controls.target;
+    shafts.forEach(function (s, i) {
+      var a = s.userData.a + Math.sin(elapsed * 0.1 + i) * 0.2;
+      s.position.set(C.x + Math.cos(a) * s.userData.r, -7.2, C.z + Math.sin(a) * s.userData.r);
+      s.rotation.y = Math.atan2(camera.position.x - s.position.x, camera.position.z - s.position.z);
+      s.rotation.z = 0.12 + Math.sin(elapsed * 0.3 + i) * 0.05;
+      s.material.opacity = 0.13 * (1 - 0.7 * dayNight.current) * (0.7 + 0.3 * Math.sin(elapsed * 0.8 + i * 2));
+    });
+    // specks drift slowly down around the camera
+    var a = marineGeo.attributes.position.array;
+    for (var i = 0; i < SNOW_N; i++) {
+      var j = i * 3;
+      a[j + 1] -= dt * 0.08;
+      for (var ax = 0; ax < 3; ax++) {
+        var rel = a[j + ax] - camera.position.getComponent(ax);
+        if (rel > 12) a[j + ax] -= 24; else if (rel < -12) a[j + ax] += 24;
+      }
+    }
+    marineGeo.attributes.position.needsUpdate = true;
+  }
+  window.addEventListener("keydown", function (e) { if (e.key === "Escape" && dive.on) exitDive(); });
+
+  // ---- the little bar that says it's happening, with "take a look" and "dive under" ----
+  var seaBar = document.getElementById("seaBar"), seaGo = document.getElementById("seaGo"), seaDive = document.getElementById("seaDive");
+  function refreshSeaBar() {
+    seaBar.hidden = !bait || bait.t > BAIT_CFG.END;
+    if (seaBar.hidden) return;
+    setText(seaDive, t(dive.on ? "bait.surface" : "bait.dive"));
+    seaGo.hidden = dive.on;
+  }
+  var seaTween = null;
+  seaGo.addEventListener("click", function () {
+    if (!bait) return;
+    userTookCamera();
+    var C = bait.C;
+    seaTween = { fromP: camera.position.clone(), fromT: controls.target.clone(), toP: new THREE.Vector3(C.x + 5, 13, C.z + 22), toT: new THREE.Vector3(C.x, 1.5, C.z), t: 0, dur: 1.6 };
+  });
+  seaDive.addEventListener("click", function () { if (dive.on) exitDive(); else enterDive(); });
+
+  function updateBait(dt, elapsed) {
+    updateHeldFish(dt);
+    if (seaTween) {
+      seaTween.t += dt;
+      var k = Math.min(1, seaTween.t / seaTween.dur);
+      k = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      camera.position.lerpVectors(seaTween.fromP, seaTween.toP, k);
+      controls.target.lerpVectors(seaTween.fromT, seaTween.toT, k);
+      if (seaTween.t >= seaTween.dur) seaTween = null;
+    }
+    if (!bait) {
+      if (visitor || volcanoState.phase === "erupting") return; // one big thing at a time
+      baitTimer -= dt;
+      if (baitTimer > 0) return;
+      bait = startBait();
+      skyPreview.event = null;
+      baitTimer = bait ? randIn(BAIT_CFG.GAP) : BAIT_CFG.RETRY;
+      refreshSeaBar();
+      return;
+    }
+    var b = bait;
+    b.t += dt;
+    // the ball gathers, tightens and rises, then shrinks as it's eaten, then scatters
+    if (b.t < BAIT_CFG.GATHER) { b.R = THREE.MathUtils.lerp(14, 6, b.t / BAIT_CFG.GATHER); b.C.y = -6; }
+    else if (b.t < BAIT_CFG.HERD) {
+      var kh = (b.t - BAIT_CFG.GATHER) / (BAIT_CFG.HERD - BAIT_CFG.GATHER);
+      b.R = THREE.MathUtils.lerp(6, 3.6, kh); b.C.y = THREE.MathUtils.lerp(-6, -3, kh);
+    } else if (b.t < BAIT_CFG.FEED) { b.R = Math.max(1.6, 3.6 * Math.cbrt(b.alive / b.n)); b.C.y = -3 + Math.sin(b.t * 0.3) * 0.3; }
+    if (b.t <= BAIT_CFG.END) {
+      updateHerring(b, dt, elapsed, baitPredators(b));
+      if (b.t > BAIT_CFG.GATHER) baitWitness("ball", b.C, 40);
+    } else b.mesh.visible = false;
+    updateBaitOrcas(b, dt, elapsed);
+    updateBaitWhale(b, dt, elapsed);
+    updateBaitGulls(b, dt, elapsed);
+    // the puffins come out to feed too, one after another
+    if (b.t > b.nextPuffinAt && b.t < BAIT_CFG.FEED - 8 && b.puffinsSent < BAIT_CFG.PUFFINS) {
+      if (sendPuffinFishing(b)) b.puffinsSent++;
+      b.nextPuffinAt = b.t + 4 + Math.random() * 6;
+    }
+    // the dark, boiling patch on the surface, flecked with silver
+    var surf = oceanSurfaceY(b.C.x, b.C.z, elapsed, currentWind01);
+    b.patch.position.set(b.C.x, surf + 0.06, b.C.z);
+    b.patch.scale.setScalar(b.R * 1.4);
+    var boil = b.t < BAIT_CFG.GATHER ? b.t / BAIT_CFG.GATHER : b.t < BAIT_CFG.FEED ? 1 : Math.max(0, 1 - (b.t - BAIT_CFG.FEED) / 10);
+    b.patch.material.opacity = 0.32 * boil;
+    b.sparkleT -= dt;
+    if (boil > 0.5 && b.sparkleT <= 0 && b.t > BAIT_CFG.GATHER) {
+      b.sparkleT = 0.25 + Math.random() * 0.25;
+      var sa = Math.random() * Math.PI * 2, sr = Math.random() * b.R;
+      spawnBurst(new THREE.Vector3(b.C.x + Math.cos(sa) * sr, surf, b.C.z + Math.sin(sa) * sr), 2, "#DDE8EE", 0.6, 1.4, 0.4, 0.6);
+    }
+    // over once it has scattered and every puffin is home
+    var gullsGone = b.gulls.every(function (g) { return Math.hypot(g.b.root.position.x - b.C.x, g.b.root.position.z - b.C.z) > 60; });
+    if (b.t > BAIT_CFG.END && gullsGone && puffinsFishingCount() === 0) {
+      if (dive.on) exitDive();
+      b.roots.forEach(function (r) {
+        scene.remove(r);
+        r.traverse(function (o) {
+          if (o.geometry && o.geometry !== herringGeo) o.geometry.dispose();
+          if (o.material && o.material !== herringMat) o.material.dispose();
+        });
+      });
+      bait = null;
+      refreshNotesUI();
+    }
+    refreshSeaBar();
   }
 
   // ===============================================================
@@ -5208,6 +6067,7 @@
     var dx = e.clientX - downPos.x, dy = e.clientY - downPos.y;
     downPos = null;
     if (Math.sqrt(dx * dx + dy * dy) > 6) return;
+    if (dive.on) return; // E5: under the water, taps don't reach the world above
 
     setPointerFromEvent(e);
     raycaster.setFromCamera(pointerNDC, camera);
@@ -5356,6 +6216,7 @@
 
   function puffinStateKey(p) {
     if (p.state === "practice" && p.practice) return p.practice.type;
+    if (p.state === "fish") return "fishing";
     if (p.state === "fly") return p.fleeing ? "flee" : (p.foodRef ? "forage" : "fly");
     if (p.state === "walk") return p.fleeing ? "flee" : p.foodRef ? "forage" : "walk";
     if (p.state === "sleep" || p.state === "spin" || p.state === "react") return p.state;
@@ -5771,14 +6632,15 @@
   var notesTabs = Array.prototype.slice.call(document.querySelectorAll(".np-tab"));
   var notesKind = "fox";
   var notesRenaming = null; // the regular whose name form is open
-  var KIND_ICON = { fox: "🦊", owl: "🦉", orca: "🐋" };
+  var KIND_ICON = { fox: "🦊", owl: "🦉", orca: "🐋", baitball: "🐟" };
 
   function notesHaveNews() {
     var since = notes.lastOpened;
     return NOTE_KINDS.some(function (k) {
       var b = notes.kinds[k].behaviors;
       return Object.keys(b).some(function (key) { return b[key] > since; });
-    }) || Object.keys(notes.individuals).some(function (id) { return notes.individuals[id].firstAt > since; });
+    }) || Object.keys(notes.individuals).some(function (id) { return notes.individuals[id].firstAt > since; }) ||
+      BAIT_MOMENTS.some(function (m) { return notes.baitball.moments[m] > since; });
   }
   function refreshNotesUI() {
     notesDot.hidden = !notesPanel.hidden || !notesHaveNews();
@@ -5855,6 +6717,7 @@
       b.setAttribute("aria-selected", on ? "true" : "false");
       b.classList.toggle("on", on);
     });
+    if (notesKind === "baitball") { renderBaitNotes(); return; }
     var k = notesKind, rec = notes.kinds[k];
     notesBody.textContent = "";
 
@@ -5921,13 +6784,47 @@
       notesBody.appendChild(bucketRow(WIND_BUCKETS, rec.winds, "wind."));
     }
   }
+  // E5: the bait ball's page — how often you've seen one, and the moments you've caught
+  function renderBaitNotes() {
+    var rec = notes.baitball;
+    notesBody.textContent = "";
+    var head = el("div", "np-head");
+    head.appendChild(el("span", "np-ico", KIND_ICON.baitball));
+    var ht = el("div", "np-head-t");
+    ht.appendChild(el("div", "np-kind", t("kindTitle.baitball")));
+    ht.appendChild(el("div", "np-meta", rec.seen
+      ? t("notes.baitSeen", { n: rec.seen }) + " · " + t("notes.lastSeen", { when: fmtWhen(rec.lastAt) })
+      : t("notes.notYet")));
+    head.appendChild(ht);
+    notesBody.appendChild(head);
+    if (rec.seen) notesBody.appendChild(el("p", "pc-note", t("kindFact.baitball")));
+    notesBody.appendChild(el("h3", "pc-sub np-h", t("notes.momentsTitle")));
+    var list = el("ul", "journal np-beh");
+    BAIT_MOMENTS.forEach(function (m) {
+      var at = rec.moments[m], li = el("li", at ? null : "unseen");
+      li.appendChild(el("span", "ji", at ? "✓" : "◌"));
+      var tx = el("span", "jt");
+      if (at) {
+        tx.appendChild(el("b", null, t("moment." + m)));
+        tx.appendChild(el("span", "np-fact", t("mfact." + m)));
+      } else {
+        tx.appendChild(el("span", null, t("notes.unseen")));
+        if (BAIT_UNDERWATER_ONLY[m]) tx.appendChild(el("span", "np-fact", t("notes.diveHint")));
+      }
+      li.appendChild(tx);
+      if (at) li.appendChild(el("span", "jd", fmtWhen(at)));
+      list.appendChild(li);
+    });
+    notesBody.appendChild(list);
+  }
   function setNotesOpen(open) {
     notesPanel.hidden = !open;
     notesBtn.setAttribute("aria-expanded", open ? "true" : "false");
     notesRenaming = null;
     if (open) {
       // open on whoever is visiting now, else the kind met most recently
-      if (visitor) notesKind = visitor.kind;
+      if (bait) notesKind = "baitball";
+      else if (visitor) notesKind = visitor.kind;
       else {
         var best = 0;
         NOTE_KINDS.forEach(function (k) {
@@ -6103,7 +7000,11 @@
     var comp = ctx.createDynamicsCompressor();
     comp.threshold.value = -16;
     comp.ratio.value = 3;
-    A.master.connect(comp);
+    A.muffle = ctx.createBiquadFilter(); // E5: closed right down while diving
+    A.muffle.type = "lowpass";
+    A.muffle.frequency.value = 22000;
+    A.master.connect(A.muffle);
+    A.muffle.connect(comp);
     comp.connect(dest);
     A.verb = ctx.createConvolver();
     A.verb.buffer = reverbImpulse(ctx, 3, 2.4);
@@ -6333,6 +7234,7 @@
     applyWindUI(windRange.value);
     applyDayToggleUI();
     applySoundUI();
+    refreshSeaBar();
     notesClose.setAttribute("aria-label", t("card.close"));
     if (!notesPanel.hidden) renderNotes();
     langToggle.textContent = t("langButton");
@@ -6448,6 +7350,8 @@
     updateFloes(elapsed, currentWind01);
     updateWhales(dt, elapsed, currentWind01);
     updateVisitors(dt, elapsed);
+    updateBait(dt, elapsed);
+    updateDiveView(dt, elapsed);
     updateAudio(dt, elapsed);
     updateParticles(dt);
     updateMeteors(dt, dayNight.current);
@@ -6474,7 +7378,8 @@
       oceanSurfaceY(camera.position.x, camera.position.z, elapsed, currentWind01),
       mountainHeightAt(camera.position.x, camera.position.z)
     ) + 0.6;
-    if (camera.position.y < floorY) camera.position.y = floorY;
+    if (dive.on) clampDiveCamera(); // E5: diving, it stays under the surface instead
+    else if (camera.position.y < floorY) camera.position.y = floorY;
     updateMoonLook(dayNight.current); // after the camera has moved, so the moon never lags a frame
 
     renderer.render(scene, camera);
